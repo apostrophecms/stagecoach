@@ -6,7 +6,10 @@ var http = require('http');
 var fs = require('fs');
 
 // Get the port number from data/port. Watch out for trailing whitespace
-var port = fs.readFileSync('data/port', 'UTF-8').replace(/\s+$/, '');
+// 'forever' may change the current working directory on us when we use a full path,
+// so use __dirname to locate ourselves instead
+
+var port = fs.readFileSync(__dirname + '/data/port', 'UTF-8').replace(/\s+$/, '');
 
 http.createServer(function (req, res) {
   res.writeHead(200, {'Content-Type': 'text/plain'});
