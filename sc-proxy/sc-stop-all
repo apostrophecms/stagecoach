@@ -7,6 +7,6 @@ source /opt/stagecoach/settings
 for dir in `ls "$DIR/apps"`
 do
   echo "Stopping $dir"
-  (su $USER -c "cd $DIR/$dir/current; bash deployment/stop")
+  (su $USER -c "cd $DIR/apps/$dir/current; bash deployment/stop")
 done
 
