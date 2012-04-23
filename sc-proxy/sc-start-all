@@ -1,0 +1,12 @@
+#!/bin/bash
+
+# Start all the apps.
+
+source /opt/stagecoach/settings
+
+for dir in `ls "$DIR/apps"`
+do
+  echo "Launching $dir"
+  (su $USER -c "cd $DIR/$dir/current; bash deployment/start")
+done
+

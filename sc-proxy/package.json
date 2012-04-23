@@ -1,0 +1,19 @@
+{
+  "name": "sc-proxy",
+  "version": "1.0.0",
+  "author": "Tom Boutell <tom@punkave.com>",
+  "description": "A reverse proxy front end to allow many staging sites on one server, based on node-http-proxy",
+  "contributors": [ 
+    {
+      "name": "Tom Boutell",
+      "email": "tom@punkave.com"
+    } 
+  ],
+  "dependencies" : {
+    "http-proxy"   :  "*"
+  },
+  "license": "MIT",
+  "engine": {
+    "node": ">=0.6"
+  }
+}

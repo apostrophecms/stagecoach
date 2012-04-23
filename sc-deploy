@@ -1,0 +1,46 @@
+#!/bin/bash
+
+USAGE="Usage: deploy staging|production (or whatever your targets are called, see your deployment directory)"
+
+if [ ! -d "deployment" ]; then
+  echo "I don't see a deployment folder in the current directory."
+  exit 1
+fi
+
+if [ -z "$1" ] ; then
+  echo $USAGE
+  exit 1
+fi
+
+TARGET=$1
+
+if [ -f "deployment/rsync_exclude.txt" ]; then
+  EXCLUDE="--exclude-from=deployment/rsync_exclude.txt"
+else
+  EXCLUDE=""
+fi
+
+# Settings files need to exist
+source deployment/settings || exit 1
+source deployment/settings.$TARGET || exit 1
+
+VERSION=`date "+%Y-%m-%d-%H-%M-%S"`
+
+# rsync to a new folder, then flip the symlink if everything runs without error.
+#
+# start is run after the symlink is changed so the current directory looks
+# more reasonable to other scripts. 
+
+DEPLOYTO="$DIR/deployments/$VERSION"
+CURRENT="$DIR/current"
+
+# For now we just don't check whether 'stop' worked, because it fails on the first
+# deploy (chicken and egg problem, stop isn't there yet). TODO: fix this with
+# an 'if folder exists' test on the server; make the remote script a multiline,
+# maintainable thing
+
+ssh -p $SSH_PORT $USER@$SERVER "mkdir -p $DIR/deployments" &&
+rsync -e "ssh -p $SSH_PORT -l$USER" -C -a --delete $EXCLUDE . $USER@$SERVER:$DEPLOYTO &&
+ssh -p $SSH_PORT $USER@$SERVER "$ADJUST_PATH; cd $CURRENT; bash deployment/stop; cd $DEPLOYTO && bash deployment/migrate && rm -rf $CURRENT && ln -s $DEPLOYTO $CURRENT && cd $CURRENT && bash deployment/start" &&
+echo "Deployment successful."
+
