@@ -85,12 +85,22 @@ The most convenient way to use `sc-proxy` is to set up a wildcard DNS "A" record
 
 If `sc-proxy` is asked to access a site that isn't part of its current configuration, it will check whether that site has been added to `/var/webapps`. In addition, once a minute `sc-proxy` scans for any modifications to `/var/webapps`, on the off chance a site has been removed or reconfigured.
 
+Configuring sc-proxy
+====================
 To configure `sc-proxy`, copy the file `config-example.js` to `config.js` and change the `domain` setting to match your needs. Also set `ip` to the IP address you want to listen on; you can set `0.0.0.0` to respond on all interfaces, but that will conflict if you have an Apache server on the same system, so you should probably use a separate IP address just for your node projects (ask your web host for an extra IP address). You can also change the port from port 80 for testing purposes if you don't have an extra IP yet, although there is not much point in using `sc-proxy` if you don't plan to get one eventually and switch back to port 80.
+
+If Apache is on the same server, you will also need to configure Apache to listen on just one IP, or at any rate to not listen on the IP set aside for `sc-proxy`. 
+
+Then cd to the `sc-proxy` folder and run:
+
+    npm install
 
 The `sc-proxy` folder also contains an `upstart` script that can start and stop the proxy and the associated apps on an Ubuntu system. By copying this script to `/etc/init` on your Ubuntu system you can arrange for your proxy and web apps to be running at all times. You can also `start stagecoach` and `stop stagecoach` at any time (as root).
 
 TODO
 ====
+
+* `start` script has to be able to tell if the job is already running via 'forever', otherwise forever will keep trying to run two copies
 
 * Clean up the way `stop` is run so that we can skip it if there is no existing deployment. Right now this spews warnings on the first deploy (but still works just fine). This is tied to the task of making the remote commands in `sc-deploy` more readable and maintainable.
 

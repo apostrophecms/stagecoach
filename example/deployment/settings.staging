@@ -6,4 +6,4 @@
 # the server
 
 USER=staging
-SERVER=localhost
+SERVER=staging.punkave.net
