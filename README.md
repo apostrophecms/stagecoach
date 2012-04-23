@@ -32,7 +32,9 @@ Additional configuration steps are covered under `sc-proxy`, below.
 sc-deploy
 =========
 
-`sc-deploy` is a short bash script that handles web app deployment with automatic rollback on failure. Like other deployment tools, sc-deploy deploys to a new folder on the target server each time you deploy, and switches a symlink at the last possible minute only if everything went smoothly. The server is stopped, migrated and started only after the rsync is complete. So depending on how long your database migrations take, your deployment downtime can be very short indeed.
+`sc-deploy` is a short bash script that handles web app deployment with automatic rollback on failure. You'll find it in `/opt/stagecoach/bin`.
+
+Like other deployment tools, sc-deploy deploys to a new folder on the target server each time you deploy, and switches a symlink at the last possible minute only if everything went smoothly. The server is stopped, migrated and started only after the rsync is complete. So depending on how long your database migrations take, your deployment downtime can be very short indeed.
 
 `sc-deploy` creates a symbolic link from `/opt/stagecoach/apps/example/current` to the latest deployment folder if everything happens successfully (assuming that your project is called `myproject` and you base your paths on those in `example`). If you're deploying traditional web languages like PHP, you'll want to make sure your web document root is configured accordingly.
 
@@ -102,10 +104,10 @@ TODO
 
 * `start` script has to be able to tell if the job is already running via 'forever', otherwise forever will keep trying to run two copies
 
-* Clean up the way `stop` is run so that we can skip it if there is no existing deployment. Right now this spews warnings on the first deploy (but still works just fine). This is tied to the task of making the remote commands in `sc-deploy` more readable and maintainable.
-
 * Write `sc-rollback`, which will roll back one or more deployments. (You can already do that by changing the symbolic link, and `sc-deploy` doesn't make a new deployment live if anything went obviously wrong, but a tool for doing this manually with less effort would be nice.)
 
 * Write `sc-cleanup`, which will purge old deployment folders.
 
 * `start` runs after the symlink is changed so that the current working directory name is consistent. But if `start` fails, we should flip the symlink back again if there is a previous deployment available and run `start` again.
+
+* Clean up the way `stop` is run so that we can skip it if there is no existing deployment. Right now this spews warnings on the first deploy (but still works just fine). This is tied to the task of making the remote commands in `sc-deploy` more readable and maintainable. But this turns out to be a really minor annoyance
