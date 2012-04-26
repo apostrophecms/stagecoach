@@ -9,7 +9,17 @@ var fs = require('fs');
 // 'forever' may change the current working directory on us when we use a full path,
 // so use __dirname to locate ourselves instead
 
-var port = fs.readFileSync(__dirname + '/data/port', 'UTF-8').replace(/\s+$/, '');
+var port;
+try
+{
+  // In staging and production get the port number from stagecoach
+  port = fs.readFileSync(__dirname + '/data/port', 'UTF-8').replace(/\s+$/, '');
+} catch (err)
+{
+  // This is handy in a dev environment
+  console.log("I see no data/port file, defaulting to port 3000");
+  port = 3000;
+}
 
 http.createServer(function (req, res) {
   res.writeHead(200, {'Content-Type': 'text/plain'});
