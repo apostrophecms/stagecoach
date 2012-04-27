@@ -80,6 +80,13 @@ Just create a `data/hosts` file for each site. In that site, list the hostnames 
 
 Note that if `data/hosts` exists, `sc-proxy` will stop responding on the staging subdomain for that site. Which doesn't bother you, because you have separate staging and production servers... I hope!
 
+Reconfiguration
+===============
+
+If you add or remove an app entirely, sc-proxy should spot that right away.
+
+If you add or modify a `hosts` file, there will be a delay of up to a minute. I'm working on changing this by watching these files in the filesystem in an efficient way.
+
 Warnings and Limitations
 ========================
 
