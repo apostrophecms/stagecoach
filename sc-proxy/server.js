@@ -20,8 +20,6 @@ fs.watch(config.appsDir, { persistent: true }, resetRouter);
 // whether the performance of using fs.watch for these would be acceptable
 setInterval(resetRouter, 60000);
 
-console.log(options);
-
 var proxyServer = httpProxy.createServer(options).listen(config.port, config.bindIp);
 
 // Reset the routes on the fly
@@ -68,6 +66,11 @@ function rebuildRouter(failQuickly)
       {
         hosts = fs.readFileSync(hostsPath, 'UTF-8').replace(/\s+$/, '');
         hosts = hosts.split(/\s+/);
+        // Don't get confused by an empty file returning one string on split
+        if ((hosts.length === 1) && hosts[0] === '')
+        {
+          hosts = [];
+        }
       }
       port = fs.readFileSync(config.appsDir + '/' + site + '/data/port', 'UTF-8').replace(/\s+$/, '');
       if (port < 1000)
@@ -90,7 +93,7 @@ function rebuildRouter(failQuickly)
     }
     hosts.forEach(function(host) {
       router[host] = local;
-    }
+    });
   }
   return router;
 }

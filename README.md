@@ -67,6 +67,19 @@ Tip: you should definitely set up a trusted ssh public key that allows you to ss
 
 In the `example` folder you'll find an example of ndoe app deployment, with all the important bits already set up (be sure to look in `example/deployment`). The `start` script integrates with `sc-proxy` by registering a port number for the project to listen on via the data/port file, and the provided example node app consults that file as well at startup.
 
+Production Hosting
+==================
+
+You can do production hosting with `sc-proxy` as well.
+
+Just create a `data/hosts` file for each site. In that site, list the hostnames that the site should respond for, like this:
+
+    myexample.com
+    www.myexample.com
+    some-alternate-name.com
+
+Note that if `data/hosts` exists, `sc-proxy` will stop responding on the staging subdomain for that site. Which doesn't bother you, because you have separate staging and production servers... I hope!
+
 Warnings and Limitations
 ========================
 
