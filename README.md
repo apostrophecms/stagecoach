@@ -1,9 +1,11 @@
 stagecoach
 ==========
 
-Stagecoach is a framework for deploying node.js web applications and testing them on a staging server. It includes a complete mechanism for running many such node applications on a single staging server, restarting them gracefully on reboot, and accessing them at nice URLs without port numbers. 
+Stagecoach is a framework for deploying node.js web applications and testing them on a staging server, then deploying them to production servers. It includes a complete mechanism for running many such node applications on a single staging or production server, restarting them gracefully on reboot, and accessing them at nice URLs without port numbers. 
 
 Stagecoach also includes `sc-deploy`, a minimalist deployment tool based on rsync that understands multiple deployment targets and makes pretty much no assumptions about your project. It is suitable for pretty much any site or web app you wish to deploy, although the examples provided are node-oriented.
+
+We also threw in a nice installer script for node, forever and mongodb on Ubuntu which installs the recommended versions from Joyent and the MongoDB team.
 
 `sc-proxy` is a node.js-based frontend proxy server solution for web apps that listen on independent ports, built on top of the amazing node-http-proxy by nodejitsu. It's great for testing lots of node projects on the same staging server while giving them all reasonable hostnames and allowing them to respond on port 80. With a little tweaking it may also be suitable for production deployment of clusters of small sites that don't need a VPS unto themselves.
 
