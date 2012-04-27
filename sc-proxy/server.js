@@ -2,6 +2,7 @@
 var config = require('./config');
 
 var fs = require('fs');
+var path = require('path');
 var http = require('http');
 var httpProxy = require('http-proxy');
 
@@ -43,11 +44,11 @@ function resetRouter()
 // If failQuickly is true, return false as soon as we hit a port file
 // we can't read or parse, so we can retry. If failQuickly is false,
 // just keep going and return the best result we can (more appropriate
-// at startup).
+// at startup). We also read an optional hosts file containing hostnames
+// that should be routed to this site, which allows production hosting
 
 function rebuildRouter(failQuickly)
 {
-  console.log("Scanning " + config.appsDir);
   var router = {};
   // Grab the names of the web apps, then read their data/port files to discover the sites we are proxying and to what ports
   var servers = fs.readdirSync(config.appsDir);
@@ -55,22 +56,41 @@ function rebuildRouter(failQuickly)
   for (i = 0; (i < servers.length); i++)
   {
     var site = servers[i];
+    var hosts = [];
+    var port;
+    // If there is a data/hosts file, read whitespace-separated hostnames from it, and
+    // respond on those for the site. This overrides the default "listen on a subdomain for
+    // each staging site" behavior for that site. Enables production hosting with stagecoach
+    var hostsPath = config.appsDir + '/' + site + '/data/hosts';
     try
     {
-      var port = fs.readFileSync(config.appsDir + '/' + site + '/data/port', 'UTF-8').replace(/\s+$/, '');
+      if (path.existsSync(hostsPath))
+      {
+        hosts = fs.readFileSync(hostsPath, 'UTF-8').replace(/\s+$/, '');
+        hosts = hosts.split(/\s+/);
+      }
+      port = fs.readFileSync(config.appsDir + '/' + site + '/data/port', 'UTF-8').replace(/\s+$/, '');
       if (port < 1000)
       {
         throw "Bad port number, probably not a complete write";
       }
     } catch (err)
     {
+      // Fail on an unexpected filesystem error or a file we suspect is incomplete
       if (failQuickly)
       {
         return false;
       }
       continue;
     }
-    router[site + '.' + config.domain] = '127.0.0.1:' + port;
+    var local = '127.0.0.1:' + port;
+    if (!hosts.length)
+    {
+      router[site + '.' + config.domain] = local;
+    }
+    hosts.forEach(function(host) {
+      router[host] = local;
+    }
   }
   return router;
 }

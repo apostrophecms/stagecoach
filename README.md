@@ -99,6 +99,11 @@ Then cd to the `sc-proxy` folder and run:
 
 The `sc-proxy` folder also contains an `upstart` script that can start and stop the proxy and the associated apps on an Ubuntu system. By copying this script to `/etc/init` on your Ubuntu system you can arrange for your proxy and web apps to be running at all times. You can also `start stagecoach` and `stop stagecoach` at any time (as root).
 
+install-node-and-mongo-on-ubuntu.bash
+=====================================
+
+This shell script is provided in the `sc-proxy` folder. It does what it says: it installs Node and MongoDB correctly on Ubuntu, using the recommended repositories for the latest stable releases, not the older stuff in Ubuntu's official repositories. It also configures MongoDB to run safely, accepting connections only on localhost. You can change that if you like, just please consider the security implications. MongoDB's default configuration has no security of any kind.
+
 TODO
 ====
 
