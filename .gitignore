@@ -1,5 +1,4 @@
 sc-proxy/config.js
 sc-proxy/node_modules
-example/deployment/mode_modules
 # These are YOUR apps, if you're trying to send me a pull request you don't want to send me these (:
 apps
