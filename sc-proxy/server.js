@@ -22,6 +22,26 @@ setInterval(resetRouter, 60000);
 
 var proxyServer = httpProxy.createServer(options).listen(config.port, config.bindIp);
 
+var table = proxyServer.proxy.proxyTable;
+// If there is a default port, monkeypatch the getProxyLocation method
+// to respect it when nothing in the routing table matches
+if (config.defaultPort)
+{
+  table.superGetProxyLocation = table.getProxyLocation;
+  table.getProxyLocation = function(req)
+  {
+    var location = table.superGetProxyLocation(req);
+    if (location)
+    {
+      return location;
+    }
+    return {
+      host: '127.0.0.1',
+      port: config.defaultPort
+    }
+  };
+}
+
 // Reset the routes on the fly
 
 function resetRouter()
@@ -34,7 +54,10 @@ function resetRouter()
     setTimeout(resetRouter, 2000);
     return;
   }
-  proxyServer.proxy.proxyTable.setRoutes(router);
+
+  var table = proxyServer.proxy.proxyTable;
+  table.setRoutes(router);
+
   proxyServer.proxy.proxyTable.emit('routes', proxyServer.proxy.proxyTable.router);
 }
 

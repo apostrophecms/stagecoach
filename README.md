@@ -111,11 +111,13 @@ If `sc-proxy` is asked to access a site that isn't part of its current configura
 
 Configuring sc-proxy
 ====================
-To configure `sc-proxy`, copy the file `config-example.js` to `config.js` and change the `domain` setting to match your needs. Also set `ip` to the IP address you want to listen on; you can set `0.0.0.0` to respond on all interfaces, but that will conflict if you have an Apache server on the same system, so you should probably use a separate IP address just for your node projects (ask your web host for an extra IP address). You can also change the port from port 80 for testing purposes if you don't have an extra IP yet, although there is not much point in using `sc-proxy` if you don't plan to get one eventually and switch back to port 80.
+To configure `sc-proxy`, copy the file `config-example.js` to `config.js` and change the `domain` setting to match your needs. Also set `ip` to the IP address you want to listen on; you can set `0.0.0.0` to respond on all interfaces. If you want to listen on a specific IP address to avoid a conflict with a second IP address reserved for Apache, you can do that as well. You can also change the port from port 80 for testing purposes, although there is not much point in using `sc-proxy` if you don't plan to eventually configure it to bind on port 80.
 
-If Apache is on the same server, you will also need to configure Apache to listen on just one IP, or at any rate to not listen on the IP set aside for `sc-proxy`. 
+Similarly, if Apache is on the same server, you will need to configure Apache to listen on a different IP address, or a different port if you use the `defaultPort` setting of `sc-proxy`.
 
-Then cd to the `sc-proxy` folder and run:
+You can set `defaultPort` to forward traffic to that port if it does not match any of your Stagecoach sites. This allows sc-proxy to act as a front end to Apache, as long as you change Apache's configuration to bind on the port indicated by `defaultPort`. This is one way to avoid a second IP address.
+
+When your configuration is complete, cd to the `sc-proxy` folder and run:
 
     npm install
 

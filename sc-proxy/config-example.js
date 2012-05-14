@@ -9,5 +9,10 @@ module.exports = {
   bindIp: '0.0.0.0',
   // Our example start and stop scripts for stagecoach assume this will be /var/webapps, but you
   // can change it if you are consistent. You'll need to edit sc-start-all and sc-stop-all
-  appsDir: '/opt/stagecoach/apps'
+  appsDir: '/opt/stagecoach/apps',
+  // If this option is present, forward all traffic that doesn't match for a stagecoach site
+  // to this port. This allows node-http-proxy to bind on the same IP as Apache and forward
+  // traffic it doesn't recognize to Apache. The opposite direction is a bad idea because
+  // Apache's reverse proxy doesn't support WebSockets
+  defaultPort: 9898
 };
