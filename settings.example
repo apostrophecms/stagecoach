@@ -1,0 +1,5 @@
+# Currently must be /opt/stagecoach
+DIR=/opt/stagecoach
+# User to launch individual webapps as.
+# Since they do not listen on port 80 this need not be root
+USER=nodeapps

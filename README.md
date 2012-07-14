@@ -27,7 +27,7 @@ Although `sc-deploy` doesn't care where you install things, for easiest use of `
 Configuration
 =============
 
-Copy stagecoach to `/opt/stagecoach` on your staging server. Edit `/opt/stagecoach/settings` and make sure `USER` is set to the non-root user that web apps should run as. Then create the `/opt/stagecoach/apps` folder and `chown` that folder to that same non-root user.
+Copy stagecoach to `/opt/stagecoach` on your staging server. Copy `/opt/stagecoach/settings.example` to `/opt/stagecoach/settings` and make sure `USER` is set to the non-root user that your apps should run as. Then create the `/opt/stagecoach/apps` folder and `chown` that folder to the same non-root user. `nodeapps` is a nice name if you want to make a new user for node apps, but any user account can be used. Root is a bad choice for security reasons.
 
 Additional configuration steps are covered under `sc-proxy`, below.
 
