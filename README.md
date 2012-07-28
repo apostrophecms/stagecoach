@@ -1,5 +1,5 @@
-stagecoach
-==========
+stagecoach: deploy and host multiple Node apps on your Linux servers
+--------------------------------------------------------------------
 
 Stagecoach is a framework for deploying node.js web applications and testing them on a staging server, then deploying them to production servers. It includes a complete mechanism for running many such node applications on a single staging or production server, restarting them gracefully on reboot, and accessing them at nice URLs without port numbers. 
 
@@ -9,9 +9,7 @@ We also threw in a nice installer script for node, forever and mongodb on Ubuntu
 
 `sc-proxy` is a node.js-based frontend proxy server solution for web apps that listen on independent ports, built on top of the amazing node-http-proxy by nodejitsu. It's great for testing lots of node projects on the same staging server while giving them all reasonable hostnames and allowing them to respond on port 80. With a little tweaking it may also be suitable for production deployment of clusters of small sites that don't need a VPS unto themselves.
 
-We chose to create these tools because we wanted a solution that didn't contain a lot of implicit assumptions about the sites being deployed (such as Capistrano, which really wants to deploy a Rails project, although you can convince it to deploy other things). 
-
-Simplicity is a major goal here. If your needs are more complex you might be happier with Haibu (for Node) or Capistrano (for Rails).
+We chose to create these tools because we wanted a solution that didn't contain a lot of implicit assumptions about the sites being deployed (such as Capistrano, which really wants to deploy a Rails project, although you can convince it to deploy other things). If you know how to add a command to a shell script, then you know how to change the behavior of stagecoach.
 
 Requirements
 ============
