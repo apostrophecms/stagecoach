@@ -1,5 +1,4 @@
-stagecoach: deploy and host multiple Node apps on your Linux servers
---------------------------------------------------------------------
+# stagecoach: deploy and host multiple Node apps on your Linux servers
 
 Stagecoach is a framework for deploying node.js web applications and testing them on a staging server, then deploying them to production servers. It includes a complete mechanism for running many such node applications on a single staging or production server, restarting them gracefully on reboot, and accessing them at nice URLs without port numbers. 
 
@@ -11,8 +10,7 @@ We also threw in a nice installer script for node, forever and mongodb on Ubuntu
 
 We chose to create these tools because we wanted a solution that didn't contain a lot of implicit assumptions about the sites being deployed (such as Capistrano, which really wants to deploy a Rails project, although you can convince it to deploy other things). If you know how to add a command to a shell script, then you know how to change the behavior of stagecoach.
 
-Requirements
-============
+## Requirements
 
 The provided start and stop scripts require that `forever` be installed globally:
 
@@ -22,15 +20,13 @@ The provided start and stop scripts require that `forever` be installed globally
 
 Although `sc-deploy` doesn't care where you install things, for easiest use of `sc-proxy` Stagecoach should be installed to `/opt/stagecoach`. Apps will run from `/opt/stagecoach/apps/appname/current`. If that is not an option for you, you'll need to make modifications.
 
-Configuration
-=============
+## Configuration
 
 Copy stagecoach to `/opt/stagecoach` on your staging server. Copy `/opt/stagecoach/settings.example` to `/opt/stagecoach/settings` and make sure `USER` is set to the non-root user that your apps should run as. Then create the `/opt/stagecoach/apps` folder and `chown` that folder to the same non-root user. `nodeapps` is a nice name if you want to make a new user for node apps, but any user account can be used. Root is a bad choice for security reasons.
 
 Additional configuration steps are covered under `sc-proxy`, below.
 
-sc-deploy
-=========
+## sc-deploy
 
 `sc-deploy` is a short bash script that handles web app deployment with automatic rollback on failure. You'll find it in `/opt/stagecoach/bin`.
 
@@ -62,13 +58,11 @@ So `sc-deploy` plays well with jenkins and other shells for running deployment a
 
 Tip: you should definitely set up a trusted ssh public key that allows you to ssh to your server without entering your password over and over.
 
-`example` app
-=============
+## `example` app
 
 In the `example` folder you'll find an example of ndoe app deployment, with all the important bits already set up (be sure to look in `example/deployment`). The `start` script integrates with `sc-proxy` by registering a port number for the project to listen on via the data/port file, and the provided example node app consults that file as well at startup.
 
-Production Hosting
-==================
+## Production Hosting
 
 You can do production hosting with `sc-proxy` as well.
 
@@ -80,15 +74,13 @@ Just create a `data/hosts` file for each site. In that site, list the hostnames 
 
 Note that if `data/hosts` exists, `sc-proxy` will stop responding on the staging subdomain for that site. Which doesn't bother you, because you have separate staging and production servers... I hope!
 
-Reconfiguration
-===============
+## Reconfiguration
 
 If you add or remove an app entirely, sc-proxy should spot that right away.
 
 If you add or modify a `hosts` file, there will be a delay of up to a minute. I'm working on changing this by watching these files in the filesystem in an efficient way.
 
-Warnings and Limitations
-========================
+## Warnings and Limitations
 
 `sc-deploy` expects that you will not have spaces in your target deployment folder name or your project name. If you like making things difficult for shell scripts, this is not the tool for you. 
 
@@ -96,8 +88,7 @@ The provided sample `start` and `stop` scripts do not attempt to use `chroot` ja
 
 This isn't for Windows.
 
-sc-proxy
-========
+## sc-proxy
 
 `sc-proxy` is a simple reverse proxy server for web applications that are installed like `example`: in subdirectories of /opt/stagecoach/apps, with a `data/port` file that records the port number each web application is listening on. `sc-proxy` accepts requests at nice URLs like `http://projectname.mydomain.com` and proxies them to `http://localhost:3001` and so forth, so that all of the projects can respond to reasonable URLs without wacky port numbers. `sc-proxy` itself is just a handful of lines of JavaScript because it is built on Nodejitsu's `node-http-proxy`, which is terrific because it handles websockets and all those other neat things that node apps do, but is also a perfectly valid proxy for any plain vanilla HTTP web application.
 
@@ -107,8 +98,8 @@ The most convenient way to use `sc-proxy` is to set up a wildcard DNS "A" record
 
 If `sc-proxy` is asked to access a site that isn't part of its current configuration, it will check whether that site has been added to `/var/webapps`. In addition, once a minute `sc-proxy` scans for any modifications to `/var/webapps`, on the off chance a site has been removed or reconfigured.
 
-Configuring sc-proxy
-====================
+## Configuring sc-proxy
+
 To configure `sc-proxy`, copy the file `config-example.js` to `config.js` and change the `domain` setting to match your needs. Also set `ip` to the IP address you want to listen on; you can set `0.0.0.0` to respond on all interfaces. If you want to listen on a specific IP address to avoid a conflict with a second IP address reserved for Apache, you can do that as well. You can also change the port from port 80 for testing purposes, although there is not much point in using `sc-proxy` if you don't plan to eventually configure it to bind on port 80.
 
 Similarly, if Apache is on the same server, you will need to configure Apache to listen on a different IP address, or a different port if you use the `defaultPort` setting of `sc-proxy`.
@@ -121,20 +112,10 @@ When your configuration is complete, cd to the `sc-proxy` folder and run:
 
 The `sc-proxy` folder also contains an `upstart` script that can start and stop the proxy and the associated apps on an Ubuntu system. By copying this script to `/etc/init` on your Ubuntu system you can arrange for your proxy and web apps to be running at all times. You can also `start stagecoach` and `stop stagecoach` at any time (as root).
 
-install-node-and-mongo-on-ubuntu.bash
-=====================================
+## Installing Node and MongoDB on Ubuntu: install-node-and-mongo-on-ubuntu.bash
 
-This shell script is provided in the `sc-proxy` folder. It does what it says: it installs Node and MongoDB correctly on Ubuntu, using the recommended repositories for the latest stable releases, not the older stuff in Ubuntu's official repositories. It also configures MongoDB to run safely, accepting connections only on localhost. You can change that if you like, just please consider the security implications. MongoDB's default configuration has no security of any kind.
+This shell script is provided in the `sc-proxy` folder. It does what it says: it installs Node and MongoDB correctly on Ubuntu, using the recommended repositories for the latest stable releases, not the older stuff in Ubuntu's official repositories. It also configures MongoDB to run safely, accepting connections only on localhost. You can change that if you like, just please consider the security implications. MongoDB's default configuration has no security of any kind, so our changes make sense.
 
-TODO
-====
+## Contact
 
-* `start` script has to be able to tell if the job is already running via 'forever', otherwise forever will keep trying to run two copies
-
-* Write `sc-rollback`, which will roll back one or more deployments. (You can already do that by changing the symbolic link, and `sc-deploy` doesn't make a new deployment live if anything went obviously wrong, but a tool for doing this manually with less effort would be nice.)
-
-* Write `sc-cleanup`, which will purge old deployment folders.
-
-* `start` runs after the symlink is changed so that the current working directory name is consistent. But if `start` fails, we should flip the symlink back again if there is a previous deployment available and run `start` again.
-
-* Clean up the way `stop` is run so that we can skip it if there is no existing deployment. Right now this spews warnings on the first deploy (but still works just fine). This is tied to the task of making the remote commands in `sc-deploy` more readable and maintainable. But this turns out to be a really minor annoyance
+[tom@punkave.com](tom@punkave.com) mostly maintains this. You can also [open issues on github](http://github.com/punkave/stagecoach). We welcome pull requests.
