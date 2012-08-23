@@ -29,7 +29,7 @@ VERSION=`date "+%Y-%m-%d-%H-%M-%S"`
 # rsync to a new folder, then flip the symlink if everything runs without error.
 #
 # start is run after the symlink is changed so the current directory looks
-# more reasonable to other scripts. 
+# more reasonable to other scripts.
 
 DEPLOYTO="$DIR/deployments/$VERSION"
 CURRENT="$DIR/current"
@@ -41,6 +41,32 @@ CURRENT="$DIR/current"
 
 ssh -p $SSH_PORT $USER@$SERVER "mkdir -p $DIR/deployments" &&
 rsync -e "ssh -p $SSH_PORT -l$USER" -C -a --delete $EXCLUDE . $USER@$SERVER:$DEPLOYTO &&
-ssh -p $SSH_PORT $USER@$SERVER "$ADJUST_PATH; cd $CURRENT; bash deployment/stop; cd $DEPLOYTO && bash deployment/migrate && rm -rf $CURRENT && ln -s $DEPLOYTO $CURRENT && cd $CURRENT && bash deployment/start" &&
-echo "Deployment successful."
+ssh -p $SSH_PORT $USER@$SERVER <<EOM
+  $ADJUST_PATH
+  # A good place to run "npm install"
+  echo "Looking for dependencies script at $DEPLOYTO/deployment/dependencies"
+  hostname
+  if [ -f $DEPLOYTO/deployment/dependencies ]; then
+    cd $DEPLOYTO
+    bash deployment/dependencies
+    if [ \$? -ne 0 ]; then
+      echo "Deployment failed during dependencies script!"
+      exit 1
+    fi
+  fi
+  cd $CURRENT
+  bash deployment/stop
+  cd $DEPLOYTO &&
+  bash deployment/migrate &&
+  rm -rf $CURRENT &&
+  ln -s $DEPLOYTO $CURRENT &&
+  cd $CURRENT &&
+  bash deployment/start
+EOM
 
+if [ $? -ne 0 ]; then
+  echo "Deployment failed!"
+  exit 1
+else
+  echo "Deployment successful."
+fi

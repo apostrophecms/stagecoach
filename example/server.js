@@ -2,7 +2,11 @@
 // Note that since we rsync_exclude that folder you can have one in your
 // git repository for testing in dev environments
 
-var http = require('http');
+// Use express just to demonstrate that we can install npm modules on the
+// remote server. You don't have to use Express
+
+var express = require('express');
+var app = express();
 var fs = require('fs');
 
 // Get the port number from data/port. Watch out for trailing whitespace
@@ -21,7 +25,8 @@ try
   port = 3000;
 }
 
-http.createServer(function (req, res) {
-  res.writeHead(200, {'Content-Type': 'text/plain'});
-  res.end("Hi there! I was deployed with stagecoach.\n");
-}).listen(port, '127.0.0.1');
+app.get('/', function(req, res) {
+  res.send("I was deployed with Stagecoach!");
+});
+
+app.listen(port);

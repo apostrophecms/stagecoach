@@ -1,0 +1,19 @@
+{
+  "author": "P'unk Avenue <tom@punkave.com> (http://punkave.com/)",
+  "name": "example",
+  "description": "Example node app run and deployed under stagecoach",
+  "version": "1.0.0",
+  "homepage": "http://github.com/punkave/stagecoach",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/punkave/stagecoach.git"
+  },
+  "dependencies": {
+    "express": "~3.0.0rc3"
+  },
+  "devDependencies": {},
+  "optionalDependencies": {},
+  "engines": {
+    "node": "*"
+  }
+}

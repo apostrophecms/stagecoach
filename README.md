@@ -1,8 +1,8 @@
 # stagecoach: host multiple Node apps on your Linux servers
 
-Stagecoach is a framework for deploying node.js web applications and testing them on a staging server, then deploying them to production servers. It includes a complete mechanism for running many such node applications on a single staging or production server, restarting them gracefully on reboot, and accessing them at nice URLs without port numbers. 
+Stagecoach is a framework for deploying node.js web applications and testing them on a staging server, then deploying them to production servers. It includes a complete mechanism for running many such node applications on a single staging or production server, restarting them gracefully on reboot, and accessing them at nice URLs without port numbers.
 
-Stagecoach also includes `sc-deploy`, a minimalist deployment tool based on rsync that understands multiple deployment targets and makes pretty much no assumptions about your project. It is suitable for pretty much any site or web app you wish to deploy, although the examples provided are node-oriented.
+Stagecoach also includes `sc-deploy`, a minimalist deployment tool based on rsync that understands multiple deployment targets and makes pretty much no assumptions about your project. It is suitable for pretty much any site or web app you wish to deploy, although the examples provided are node-oriented. Although `sc-deploy` relies on `rsync` it will also run an optional `dependencies` script to install dependencies that are server-specific and can't be transferred from your development environment. This is handy for installing npm modules with `npm install`.
 
 We also threw in a nice installer script for node, forever and mongodb on Ubuntu which installs the recommended versions from Joyent and the MongoDB team.
 
@@ -34,7 +34,7 @@ Like other deployment tools, sc-deploy deploys to a new folder on the target ser
 
 `sc-deploy` creates a symbolic link from `/opt/stagecoach/apps/example/current` to the latest deployment folder if everything happens successfully (assuming that your project is called `myproject` and you base your paths on those in `example`). If you're deploying traditional web languages like PHP, you'll want to make sure your web document root is configured accordingly.
 
-`sc-deploy` relies on bash scripts in a subdirectory of your project called `deployment` to carry out the work of starting (`start`), stopping (`stop`) and migrating (`migrate`) your project. If any of these exit with a nonzero status, the deployment process stops and the previous version of the site stays live. Currently any failed deployment folders are left on the server for your debugging convenience.
+`sc-deploy` relies on bash scripts in a subdirectory of your project called `deployment` to carry out the work of starting (`start`), installing dependencies for (`dependencies`), stopping (`stop`) and migrating (`migrate`) your project. If any of these scripts exit with a nonzero status, the deployment process stops and the previous version of the site stays live. Currently any failed deployment folders are left on the server for your debugging convenience.
 
 Settings that apply to all deployment targets for this project, such as the project's name and (usually) the deployment directory, reside in `deployment/settings`. You'll want to edit the `PROJECT` setting, and possibly the `DIR` setting as well. The project name should be a reasonable Unix shortname; it's the folder name you'll be deploying to. If you use `sc-proxy` it is also the subdomain you'll use to access the staging site.
 
@@ -62,6 +62,14 @@ Tip: you should definitely set up a trusted ssh public key that allows you to ss
 
 In the `example` folder you'll find an example of ndoe app deployment, with all the important bits already set up (be sure to look in `example/deployment`). The `start` script integrates with `sc-proxy` by registering a port number for the project to listen on via the data/port file, and the provided example node app consults that file as well at startup.
 
+## Installing dependencies on the server side
+
+Note that if your project has a `production/dependencies` script it will be run immediately after the rsync is complete and before the site is restarted. This is the right place to execute `npm install` if your application has dependencies on npm modules that involve compiled code that can't be transferred from your own computer.
+
+Did your eyes skip right over all that? Don't worry - if you are copying your app's `deployment` folder from the latest `example` app included with stagecoach, then `npm install` will happen for you automatically. Those of you already using stagecoach who want this feature can just copy `example/deployment/dependencies`.
+
+Thanks to Howard Tyson for pointing out the need to install dependencies on the server side.
+
 ## Production Hosting
 
 You can do production hosting with `sc-proxy` as well.
@@ -82,7 +90,7 @@ If you add or modify a `hosts` file, there will be a delay of up to a minute. I'
 
 ## Warnings and Limitations
 
-`sc-deploy` expects that you will not have spaces in your target deployment folder name or your project name. If you like making things difficult for shell scripts, this is not the tool for you. 
+`sc-deploy` expects that you will not have spaces in your target deployment folder name or your project name. If you like making things difficult for shell scripts, this is not the tool for you.
 
 The provided sample `start` and `stop` scripts do not attempt to use `chroot` jails to prevent apps from seeing each other's files. If you need that, you might be happier with `haibu`.
 
