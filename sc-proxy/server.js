@@ -2,7 +2,6 @@
 var config = require('./config');
 
 var fs = require('fs');
-var path = require('path');
 var http = require('http');
 var httpProxy = require('http-proxy');
 
@@ -85,7 +84,7 @@ function rebuildRouter(failQuickly)
     var hostsPath = config.appsDir + '/' + site + '/data/hosts';
     try
     {
-      if (path.existsSync(hostsPath))
+      if (fs.existsSync(hostsPath))
       {
         hosts = fs.readFileSync(hostsPath, 'UTF-8').replace(/\s+$/, '');
         hosts = hosts.split(/\s+/);
