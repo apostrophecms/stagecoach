@@ -15,8 +15,7 @@
 
 # Assumes you have at least Ubuntu 10.04 (I haven't tested further back).
 
-# We install nodejs and npm in separate steps because of an odd error from
-# Ubuntu if we do it in one call.
+# npm is now part of the nodejs package, removed failing step to separately install it.
 
 echo "Installing requirements for building node extensions" &&
 apt-get -y install build-essential &&
@@ -25,7 +24,6 @@ apt-get -y install python-software-properties &&
 add-apt-repository ppa:chris-lea/node.js &&
 apt-get -y update &&
 apt-get -y install nodejs &&
-apt-get -y install npm &&
 echo "Node installed" &&
 echo "Installing MongoDB" &&
 apt-key adv --keyserver keyserver.ubuntu.com --recv 7F0CEB10 &&
