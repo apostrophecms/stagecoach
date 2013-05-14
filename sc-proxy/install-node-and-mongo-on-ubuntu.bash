@@ -33,6 +33,10 @@ apt-get -y install mongodb-10gen &&
 echo "Installed MongoDB" &&
 echo "Configuring MongoDB to listen only on localhost" &&
 echo "bind_ip = 127.0.0.1" >> /etc/mongodb.conf &&
+# The default configuration for MongoDB assumes taking up 6GB off the bat for every single
+# database is cool and also inhales tons of space for journal files. This is overkill for
+# most deployments, so we instruct MongoDB to use smaller files
+echo "smallfiles = true" >> /etc/mongodb.conf &&
 /usr/sbin/service mongodb restart &&
 npm install -g forever &&
 echo "Success!"
