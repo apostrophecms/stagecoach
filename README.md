@@ -50,7 +50,7 @@ Run sc-deploy like this (after setting up your deployment folder correctly):
 
 You'll want to make sure `sc-deploy` is in your `PATH`.
 
-`sc-deploy` deploys straightforwardly from the current directory to the target via rsync. This is a deliberate choice: the code you just QA'd on the box in front of you is the code you want to deploy, not something that might be juuuust a little different in fun and surprising ways. However you can easily wrap `sc-deploy` in a script that updates from git, svn or whatever yoou may prefer and then runs tests before agreeing to carry out a deployment. As long as you have a test script that returns a nonzero exit code on failure, that can be as simple as:
+`sc-deploy` deploys straightforwardly from the current directory to the target via rsync. This is a deliberate choice: the code you just QA'd on the box in front of you is the code you want to deploy, not something that might be juuuust a little different in fun and surprising ways. However you can easily wrap `sc-deploy` in a script that updates from git, svn or whatever you may prefer and then runs tests before agreeing to carry out a deployment. As long as you have a test script that returns a nonzero exit code on failure, that can be as simple as:
 
     git pull && ./tests && sc-deploy staging
 
