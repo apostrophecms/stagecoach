@@ -31,15 +31,24 @@ VERSION=`date "+%Y-%m-%d-%H-%M-%S"`
 # start is run after the symlink is changed so the current directory looks
 # more reasonable to other scripts.
 
-DEPLOYTO="$DIR/deployments/$VERSION"
+DEPLOYMENTS="$DIR/deployments"
+DEPLOYTO="$DEPLOYMENTS/$VERSION"
 CURRENT="$DIR/current"
+
+# Keep 5 deployments by default
+if [ -z "$KEEP" ]; then
+  KEEP=5
+fi
+
+# For use with tail -n
+KEPT=$[$KEEP+1]
 
 # For now we just don't check whether 'stop' worked, because it fails on the first
 # deploy (chicken and egg problem, stop isn't there yet). TODO: fix this with
 # an 'if folder exists' test on the server; make the remote script a multiline,
 # maintainable thing
 
-ssh -p $SSH_PORT $USER@$SERVER "mkdir -p $DIR/deployments" &&
+ssh -p $SSH_PORT $USER@$SERVER "mkdir -p $DIR/deployments" &&Mig
 rsync -e "ssh -p $SSH_PORT -l$USER" -C -a --delete $EXCLUDE . $USER@$SERVER:$DEPLOYTO &&
 ssh -p $SSH_PORT $USER@$SERVER <<EOM
   $ADJUST_PATH
@@ -49,19 +58,54 @@ ssh -p $SSH_PORT $USER@$SERVER <<EOM
   if [ -f $DEPLOYTO/deployment/dependencies ]; then
     cd $DEPLOYTO
     bash deployment/dependencies
-    if [ \$? -ne 0 ]; then
-      echo "Deployment failed during dependencies script!"
-      exit 1
-    fi
   fi
-  cd $CURRENT
-  bash deployment/stop
-  cd $DEPLOYTO &&
-  bash deployment/migrate &&
-  rm -rf $CURRENT &&
-  ln -s $DEPLOYTO $CURRENT &&
-  cd $CURRENT &&
-  bash deployment/start
+  if [ \$? -eq 0 ]; then
+    # Stop old deployment if any
+    if [ -e $CURRENT ]; then
+      # Don't give up yet if we can't stop the old deployment - it might just be
+      # broken and the main reason we're deploying a new one
+      FORMER=\`readlink $CURRENT\`
+      if [ \$? -eq 0 ]; then
+        cd $CURRENT &&
+        echo "Stopping previous deployment" &&
+        bash deployment/stop
+      else
+        echo "Previous deployment is missing"
+      fi
+    fi
+    # Run migrations and start new deployment after flipping symlink
+    cd $DEPLOYTO &&
+    bash deployment/migrate &&
+    rm -rf $CURRENT &&
+    ln -s $DEPLOYTO $CURRENT &&
+    cd $CURRENT &&
+    bash deployment/start
+  fi
+  # If deployment failed, relink and restart the previous deployment
+  if [ \$? -ne 0 ]; then
+    echo "ERROR on deployment"
+    if [ -n "\$FORMER" ]; then
+      echo "Relinking previous deployment"
+      rm -f $CURRENT
+      ln -s \$FORMER $CURRENT &&
+      echo "Restarting previous deployment" &&
+      cd $CURRENT && bash deployment/start
+    else
+      echo "There is no prior deployment to restart."
+    fi
+    echo "Removing failed deployment"
+    rm -rf $DEPLOYTO
+    # Maintain a nonzero status so we know it's an overall failure
+    false
+  else
+    echo "Launch successful."
+    echo "Removing old deployments as appropriate..."
+    # ls sorts alphabetically by default, our deployments are named to sort that way
+    # Thanks to @xavismeh for the tail -n approach
+    echo "Keeping $KEEP deployments"
+    find "$DEPLOYMENTS" -mindepth 1 -maxdepth 1 | sort -r | tail -n +$KEPT | xargs rm -rf
+    echo "Done."
+  fi
 EOM
 
 if [ $? -ne 0 ]; then

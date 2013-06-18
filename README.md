@@ -34,6 +34,8 @@ Like other deployment tools, sc-deploy deploys to a new folder on the target ser
 
 `sc-deploy` creates a symbolic link from `/opt/stagecoach/apps/example/current` to the latest deployment folder if everything happens successfully (assuming that your project is called `myproject` and you base your paths on those in `example`). If you're deploying traditional web languages like PHP, you'll want to make sure your web document root is configured accordingly.
 
+**By default, 5 old deployments are kept on the server.** This is useful if you need to roll back. You can change this number by setting `KEEP` in your `deployment/settings` file.
+
 `sc-deploy` relies on bash scripts in a subdirectory of your project called `deployment` to carry out the work of starting (`start`), installing dependencies for (`dependencies`), stopping (`stop`) and migrating (`migrate`) your project. If any of these scripts exit with a nonzero status, the deployment process stops and the previous version of the site stays live. Currently any failed deployment folders are left on the server for your debugging convenience.
 
 Settings that apply to all deployment targets for this project, such as the project's name and (usually) the deployment directory, reside in `deployment/settings`. You'll want to edit the `PROJECT` setting, and possibly the `DIR` setting as well. The project name should be a reasonable Unix shortname; it's the folder name you'll be deploying to. If you use `sc-proxy` it is also the subdomain you'll use to access the staging site.
@@ -127,6 +129,10 @@ You don't have to use Ubuntu. But if you do, you might find this shell script ha
     sc-proxy/install-node-and-mongo-on-ubuntu.bash
 
 This shell script is provided in the `sc-proxy` folder. It does what it says: it installs Node and MongoDB correctly on Ubuntu, using the recommended repositories for the latest stable releases, not the older stuff in Ubuntu's official repositories. It also configures MongoDB to run safely, accepting connections only on localhost. You can change that if you like, just please consider the security implications. MongoDB's default configuration has no security of any kind, so our changes make sense.
+
+## Changelog
+
+06/18/2013: `sc-deploy` overhauled. Now keeps 5 deployments on the server by default rather than keeping them forever. You can adjust this number via the `KEEP` variable in `deployment/settings`. Also, `sc-deploy` does a better job of recognizing problems at the end of the deployment process and will flip the symbolic link back to the previous deployment and attempt to restart that version of the code if deployment fails.
 
 ## Contact
 

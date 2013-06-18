@@ -36,9 +36,9 @@ else
 fi
 
 # Run the app via 'forever' so that it restarts automatically if it fails
-# Use `pwd` to make sure we have a full path, forever is otherwise easily confused 
+# Use `pwd` to make sure we have a full path, forever is otherwise easily confused
 # and will stop every server with the same filename
-forever -o data/console.log -e data/error.log start `pwd`/server.js && echo "Site started"
+forever --minUptime 1000 --spinSleepTime 5000 -o data/console.log -e data/error.log start `pwd`/server.js && echo "Site started"
 
 # Run the app without 'forever'. Record the process id so 'stop' can kill it later.
 # We recommend installing 'forever' instead for node apps. For non-node apps this code
