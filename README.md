@@ -122,6 +122,13 @@ When your configuration is complete, cd to the `sc-proxy` folder and run:
 
 The `sc-proxy` folder also contains an `upstart` script that can start and stop the proxy and the associated apps on an Ubuntu system. By copying this script to `/etc/init` on your Ubuntu system you can arrange for your proxy and web apps to be running at all times. You can also `start stagecoach` and `stop stagecoach` at any time (as root).
 
+## Restarting Sites on Reboot
+
+Drop this in `/etc/rc.local` (on Ubuntu) or otherwise execute it on reboot:
+
+    cd /opt/stagecoach/sc-proxy
+    bash sc-start-all
+
 ## Installing Node and MongoDB on Ubuntu
 
 You don't have to use Ubuntu. But if you do, you might find this shell script handy:
@@ -129,6 +136,33 @@ You don't have to use Ubuntu. But if you do, you might find this shell script ha
     sc-proxy/install-node-and-mongo-on-ubuntu.bash
 
 This shell script is provided in the `sc-proxy` folder. It does what it says: it installs Node and MongoDB correctly on Ubuntu, using the recommended repositories for the latest stable releases, not the older stuff in Ubuntu's official repositories. It also configures MongoDB to run safely, accepting connections only on localhost. You can change that if you like, just please consider the security implications. MongoDB's default configuration has no security of any kind, so our changes make sense.
+
+## Using nginx instead
+
+We often wind up using [nginx](http://nginx.org) rather than `sc-proxy`. `sc-deploy` certainly doesn't mind. All you have to do is set up nginx to proxy connections for each site to the port number for each node app. The port number can be found in the `data/port` file for that app on the server.
+
+You don't get automatic addition of new sites this way (not yet, anyway) but with node 0.10.x we experienced some difficulties with `sc-proxy` and `node-http-proxy` and decided we didn't need this particular piece of our ecosystem to run on node.
+
+Here's an nginx configuration file for one of our sites:
+
+    server {
+        listen       www.example.com:80;
+        server_name  www.example.com;
+
+        access_log  /var/log/nginx/example.access.log;
+        error_log  /var/log/nginx/example.error.log;
+        client_max_body_size 32M;
+
+        location / {
+         proxy_pass  http://localhost:3000;
+         proxy_next_upstream error timeout invalid_header http_500 http_502 http_503 http_504;
+         proxy_redirect off;
+         proxy_buffering off;
+         proxy_set_header        Host            $host;
+         proxy_set_header        X-Real-IP       $remote_addr;
+         proxy_set_header        X-Forwarded-For $proxy_add_x_forwarded_for;
+       }
+    }
 
 ## Changelog
 
