@@ -48,7 +48,7 @@ KEPT=$[$KEEP+1]
 # an 'if folder exists' test on the server; make the remote script a multiline,
 # maintainable thing
 
-ssh -p $SSH_PORT $USER@$SERVER "mkdir -p $DIR/deployments" &&Mig
+ssh -p $SSH_PORT $USER@$SERVER "mkdir -p $DIR/deployments" &&
 rsync -e "ssh -p $SSH_PORT -l$USER" -C -a --delete $EXCLUDE . $USER@$SERVER:$DEPLOYTO &&
 ssh -p $SSH_PORT $USER@$SERVER <<EOM
   $ADJUST_PATH
