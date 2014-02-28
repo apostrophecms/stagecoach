@@ -52,5 +52,8 @@ respawn
 EOM
 
 start mongodb &&
+# Upgrade npm to latest and prevent self-signed certificate error
+npm config set ca "" && npm install -g npm &&
+# Used to run things indefinitely restarting as needed
 npm install -g forever &&
 echo "Success!"
