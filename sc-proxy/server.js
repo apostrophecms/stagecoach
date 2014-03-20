@@ -8,7 +8,6 @@ var httpProxy = require('http-proxy');
 var options = {};
 
 options = rebuildRouter(false);
-console.log(options);
 
 // If a site is added or removed, rebuild the routing table on the spot. Do that by
 // watching /var/webapps for changes. It's not recursive but it'll spot the
@@ -25,9 +24,16 @@ var proxyServer = httpProxy.createServer();
 require('http').createServer(function(req, res) {
     // quick and dirty fix, to be sure its running...
     // implement https, and some switches for new http-proxy functions
-    proxyServer.web(req, res, {
-	target: 'http://' + options[req.headers.host]
-    });
+    
+    try {
+	proxyServer.web(req, res, {
+	    target: 'http://' + options[req.headers.host]
+	}, function(err) {
+	    console.log("unexpected error: " + err);
+	});
+    } catch (err) {
+	
+    }
 }).listen(config.port, config.bindIp);
 
 
@@ -43,11 +49,6 @@ function resetRouter()
   }
     
     options = router;
-
-  //var table = proxyServer.proxy.proxyTable;
-  //table.setRoutes(router);
-
-  //proxyServer.proxy.proxyTable.emit('routes', proxyServer.proxy.proxyTable.router);
 }
 
 // Rebuild the routes, at startup or in response to a change.
