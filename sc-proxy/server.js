@@ -7,7 +7,8 @@ var httpProxy = require('http-proxy');
 
 var options = {};
 
-options.router = rebuildRouter(false);
+options = rebuildRouter(false);
+console.log(options);
 
 // If a site is added or removed, rebuild the routing table on the spot. Do that by
 // watching /var/webapps for changes. It's not recursive but it'll spot the
@@ -19,29 +20,16 @@ fs.watch(config.appsDir, { persistent: true }, resetRouter);
 // whether the performance of using fs.watch for these would be acceptable
 setInterval(resetRouter, 60000);
 
-var proxyServer = httpProxy.createServer(options).listen(config.port, config.bindIp);
+var proxyServer = httpProxy.createServer();
 
-var table = proxyServer.proxy.proxyTable;
-// If there is a default port, monkeypatch the getProxyLocation method
-// to respect it when nothing in the routing table matches
-if (config.defaultPort)
-{
-  table.superGetProxyLocation = table.getProxyLocation;
-  table.getProxyLocation = function(req)
-  {
-    var location = table.superGetProxyLocation(req);
-    if (location)
-    {
-      return location;
-    }
-    return {
-      host: '127.0.0.1',
-      port: config.defaultPort
-    }
-  };
-}
+require('http').createServer(function(req, res) {
+    // quick and dirty fix, to be sure its running...
+    // implement https, and some switches for new http-proxy functions
+    proxyServer.web(req, res, {
+	target: 'http://' + options[req.headers.host]
+    });
+}).listen(config.port, config.bindIp);
 
-// Reset the routes on the fly
 
 function resetRouter()
 {
@@ -53,11 +41,13 @@ function resetRouter()
     setTimeout(resetRouter, 2000);
     return;
   }
+    
+    options = router;
 
-  var table = proxyServer.proxy.proxyTable;
-  table.setRoutes(router);
+  //var table = proxyServer.proxy.proxyTable;
+  //table.setRoutes(router);
 
-  proxyServer.proxy.proxyTable.emit('routes', proxyServer.proxy.proxyTable.router);
+  //proxyServer.proxy.proxyTable.emit('routes', proxyServer.proxy.proxyTable.router);
 }
 
 // Rebuild the routes, at startup or in response to a change.
