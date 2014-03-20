@@ -9,46 +9,40 @@ var options = {};
 
 options = rebuildRouter(false);
 
-// If a site is added or removed, rebuild the routing table on the spot. Do that by
-// watching /var/webapps for changes. It's not recursive but it'll spot the
-// important stuff
-fs.watch(config.appsDir, { persistent: true }, resetRouter);
+fs.watch(config.appsDir, {
+  persistent: true
+}, resetRouter);
 
-// Also rebuild the routing table once per minute in case of a change to a port number 
-// (it's a low probability event but we ought to spot it eventually). TODO: consider
-// whether the performance of using fs.watch for these would be acceptable
 setInterval(resetRouter, 60000);
 
 var proxyServer = httpProxy.createServer();
 
 require('http').createServer(function(req, res) {
-    // quick and dirty fix, to be sure its running...
-    // implement https, and some switches for new http-proxy functions
-    
-    try {
-	proxyServer.web(req, res, {
-	    target: 'http://' + options[req.headers.host]
-	}, function(err) {
-	    console.log("unexpected error: " + err);
-	});
-    } catch (err) {
-	
-    }
+  // quick and dirty fix, to be sure its running...
+  // implement https, and some switches for new http-proxy functions
+
+  try {
+    proxyServer.web(req, res, {
+      target: 'http://' + options[req.headers.host]
+    }, function(err) {
+      console.log("unexpected error: " + err);
+    });
+  } catch (err) {
+
+  }
 }).listen(config.port, config.bindIp);
 
 
-function resetRouter()
-{
+function resetRouter() {
   var router = rebuildRouter(true);
-  if (!router)
-  {
+  if (!router) {
     // Try again in a bit, failure to read the port files typically means a deployment is
     // in progress
     setTimeout(resetRouter, 2000);
     return;
   }
-    
-    options = router;
+
+  options = router;
 }
 
 // Rebuild the routes, at startup or in response to a change.
@@ -58,14 +52,13 @@ function resetRouter()
 // at startup). We also read an optional hosts file containing hostnames
 // that should be routed to this site, which allows production hosting
 
-function rebuildRouter(failQuickly)
-{
+function rebuildRouter(failQuickly) {
   var router = {};
   // Grab the names of the web apps, then read their data/port files to discover the sites we are proxying and to what ports
   var servers = fs.readdirSync(config.appsDir);
   var i;
-  for (i = 0; (i < servers.length); i++)
-  {
+  for (i = 0;
+    (i < servers.length); i++) {
     var site = servers[i];
     var hosts = [];
     var port;
@@ -73,35 +66,28 @@ function rebuildRouter(failQuickly)
     // respond on those for the site. This overrides the default "listen on a subdomain for
     // each staging site" behavior for that site. Enables production hosting with stagecoach
     var hostsPath = config.appsDir + '/' + site + '/data/hosts';
-    try
-    {
-      if (fs.existsSync(hostsPath))
-      {
+    try {
+      if (fs.existsSync(hostsPath)) {
         hosts = fs.readFileSync(hostsPath, 'UTF-8').replace(/\s+$/, '');
         hosts = hosts.split(/\s+/);
         // Don't get confused by an empty file returning one string on split
-        if ((hosts.length === 1) && hosts[0] === '')
-        {
+        if ((hosts.length === 1) && hosts[0] === '') {
           hosts = [];
         }
       }
       port = fs.readFileSync(config.appsDir + '/' + site + '/data/port', 'UTF-8').replace(/\s+$/, '');
-      if (port < 1000)
-      {
+      if (port < 1000) {
         throw "Bad port number, probably not a complete write";
       }
-    } catch (err)
-    {
+    } catch (err) {
       // Fail on an unexpected filesystem error or a file we suspect is incomplete
-      if (failQuickly)
-      {
+      if (failQuickly) {
         return false;
       }
       continue;
     }
     var local = '127.0.0.1:' + port;
-    if (!hosts.length)
-    {
+    if (!hosts.length) {
       router[site + '.' + config.domain] = local;
     }
     hosts.forEach(function(host) {
