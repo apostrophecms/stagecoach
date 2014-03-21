@@ -1,0 +1,9 @@
+{
+    "name"       : "proxy",
+    "script"     : "server.js",
+    "instances"  : "1",
+    "error_file" : "data/error.log",
+    "out_file"   : "data/console.log",
+    "pid_file"   : "data/child.pid",
+    "exec_mode"  : "cluster_mode"
+}
