@@ -8,23 +8,4 @@ if [ ! -f "server.js" ]; then
   exit 1
 fi
 
-# Assign a port number if we don't yet have one
-
-if [ -f "data/port" ]; then
-  PORT=`cat data/port`
-else
-  # No port set yet for this site. Scan and sort the existing port numbers if any,
-  # grab the highest existing one
-  PORT=`cat ../../../*/data/port 2>/dev/null | sort -n | tail -1`
-  if [ "$PORT" == "" ]; then
-  	echo "First app ever, assigning port 3000"
-  	PORT=3000
-  else
-    # Bash is much nicer than sh! We can do math without tears!
-    let PORT+=1
-  fi
-  echo $PORT > data/port
-  echo "First startup, chose port $PORT for this site"
-fi
-
 pm2 start hostconfig.json
