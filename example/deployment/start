@@ -1,15 +1,7 @@
 #!/bin/bash
 
-# Make the site live again, for instance by tweaking a .htaccess file
-# or starting a node server. In this example we also set up a
-# data/port file so that sc-proxy.js can figure out what port
-# to forward traffic to for this site. The idea is that every
-# folder in /var/webapps represents a separate project with a separate
-# node process, each listening on a specific port, and they all
-# need traffic forwarded from a reverse proxy server on port 80
-
 # Useful for debugging
-#set -x verbose
+set -x verbose
 
 if [ ! -f "server.js" ]; then
   echo "I don't see server.js in the current directory."
@@ -35,17 +27,4 @@ else
   echo "First startup, chose port $PORT for this site"
 fi
 
-# Run the app via 'forever' so that it restarts automatically if it fails
-# Use `pwd` to make sure we have a full path, forever is otherwise easily confused
-# and will stop every server with the same filename
-forever --minUptime 1000 --spinSleepTime 5000 -o data/console.log -e data/error.log start `pwd`/server.js && echo "Site started"
-
-# Run the app without 'forever'. Record the process id so 'stop' can kill it later.
-# We recommend installing 'forever' instead for node apps. For non-node apps this code
-# may be helpful
-#
-# node server.js >> data/console.log 2>&1 &
-# PID=$!
-# echo $PID > data/pid
-#	
-#echo "Site started"
+pm2 start deployment/hostconfig.json
