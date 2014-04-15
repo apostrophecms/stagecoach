@@ -51,6 +51,8 @@ end script
 respawn
 EOM
 
+echo "It is OK to get a warning here"
+stop mongodb
 start mongodb &&
 # Upgrade npm to latest and prevent self-signed certificate error
 npm config set ca "" && npm install -g npm &&
