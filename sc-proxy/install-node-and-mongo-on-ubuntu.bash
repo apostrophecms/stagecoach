@@ -21,6 +21,7 @@ echo "Installing requirements for building node extensions" &&
 apt-get -y install build-essential &&
 echo "Installing Node" &&
 apt-get -y install python-software-properties &&
+apt-get -y install software-properties-common &&
 add-apt-repository -y ppa:chris-lea/node.js &&
 apt-get -y update &&
 apt-get -y install nodejs &&
