@@ -59,4 +59,7 @@ start mongodb &&
 npm config set ca "" && npm install -g npm &&
 # Used to run things indefinitely restarting as needed
 npm install -g forever &&
+# Make sure everyone can actually run forever. Latest npm makes the bin
+# scripts executable but not readable which does not make sense
+chmod -R a+r /usr/lib/node_modules/ &&
 echo "Success!"
