@@ -1,6 +1,6 @@
 #!/bin/bash
 
-USAGE="Usage: deploy staging|production (or whatever your targets are called, see your deployment directory)"
+USAGE="Usage: sc-deploy staging|production (or whatever your targets are called, see your deployment directory)"
 
 if [ ! -d "deployment" ]; then
   echo "I don't see a deployment folder in the current directory."

@@ -1,0 +1,43 @@
+#!/bin/bash
+
+if [ ! -d "deployment" ]; then
+  echo "I don't see a deployment folder in the current directory."
+  exit 1
+fi
+
+if [ -z "$1" ] ; then
+  echo "sc-rollback staging|production"
+  echo
+  echo "Lists available datestamps to roll back to."
+  echo
+  echo "sc-rollback production YYYY-MM-DD-HH-MM-SS"
+  echo
+  echo "Rolls back to that datestamp."
+  exit 1
+fi
+
+TARGET=$1
+
+# Settings files need to exist
+source deployment/settings || exit 1
+source deployment/settings.$TARGET || exit 1
+
+DEPLOYMENTS="$DIR/deployments"
+
+if [ -z "$2" ] ; then
+  echo "Available deployments:"
+  ssh -p $SSH_PORT $USER@$SERVER ls $DEPLOYMENTS
+  exit 0
+fi
+
+ssh -p $SSH_PORT $USER@$SERVER <<EOM
+cd $DIR/current &&
+sh deployment/stop &&
+cd $DIR &&
+rm -f $DIR/current &&
+ln -s $DIR/deployments/$2 $DIR/current &&
+cd $DIR/current &&
+sh deployment/migrate &&
+sh deployment/start &&
+echo "Rollback successful."
+EOM

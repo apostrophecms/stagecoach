@@ -4,6 +4,8 @@ Stagecoach is a framework for deploying node.js web applications and testing the
 
 Stagecoach also includes `sc-deploy`, a minimalist deployment tool based on rsync that understands multiple deployment targets and makes pretty much no assumptions about your project. It is suitable for pretty much any site or web app you wish to deploy, although the examples provided are node-oriented. Although `sc-deploy` relies on `rsync` it will also run an optional `dependencies` script to install dependencies that are server-specific and can't be transferred from your development environment. This is handy for installing npm modules with `npm install`.
 
+An `sc-rollback` script is included for those cases where you regret a deployment.
+
 We also threw in a nice installer script for node, forever and mongodb on Ubuntu which installs the recommended versions from Joyent and the MongoDB team.
 
 `sc-proxy` is a node.js-based frontend proxy server solution for web apps that listen on independent ports, built on top of the amazing node-http-proxy by nodejitsu. It's great for testing lots of node projects on the same staging server while giving them all reasonable hostnames and allowing them to respond on port 80. With a little tweaking it may also be suitable for production deployment of clusters of small sites that don't need a VPS unto themselves.
@@ -18,7 +20,7 @@ The provided start and stop scripts require that `forever` be installed globally
 
 `forever` is a great node utility for ensuring that a process is restarted if it should fail.
 
-Although `sc-deploy` doesn't care where you install things, for easiest use of `sc-proxy` Stagecoach should be installed to `/opt/stagecoach`. Apps will run from `/opt/stagecoach/apps/appname/current`. If that is not an option for you, you'll need to make modifications.
+Stagecoach should be installed to `/opt/stagecoach`. Apps will run from `/opt/stagecoach/apps/appname/current`.
 
 ## Configuration
 
@@ -29,6 +31,8 @@ Additional configuration steps are covered under `sc-proxy`, below.
 ## sc-deploy
 
 `sc-deploy` is a short bash script that handles web app deployment with automatic rollback on failure. You'll find it in `/opt/stagecoach/bin`.
+
+`sc-deploy` is meant to be run on your **development** system, and deploys code to other systems.
 
 Like other deployment tools, sc-deploy deploys to a new folder on the target server each time you deploy, and switches a symlink at the last possible minute only if everything went smoothly. The server is stopped, migrated and started only after the rsync is complete. So depending on how long your database migrations take, your deployment downtime can be very short indeed.
 
@@ -59,6 +63,30 @@ You'll want to make sure `sc-deploy` is in your `PATH`.
 So `sc-deploy` plays well with jenkins and other shells for running deployment and testing tools.
 
 Tip: you should definitely set up a trusted ssh public key that allows you to ssh to your server without entering your password over and over.
+
+## sc-rollback
+
+`sc-rollback` is meant to be run on your **development** system, and rolls back deployments on other systems.
+
+If you regret a deployment to `production`, type:
+
+sc-rollback production
+
+For a list of previous deployments, named by the date and time. For instance:
+
+```
+Available deployments:
+2014-12-04-18-40-26
+2014-12-05-08-46-33
+```
+
+To roll back to one of these, type:
+
+```
+sc-rollback production 2014-12-04-18-40-26
+```
+
+**Warning:** if you have performed database migrations that are not backwards-compatible, such as removing a column from a SQL table, you should not roll back.
 
 ## `example` app
 
@@ -165,6 +193,8 @@ Here's an nginx configuration file for one of our sites:
     }
 
 ## Changelog
+
+12/11/2014: `sc-rollback` introduced.
 
 06/18/2013: `sc-deploy` overhauled. Now keeps 5 deployments on the server by default rather than keeping them forever. You can adjust this number via the `KEEP` variable in `deployment/settings`. Also, `sc-deploy` does a better job of recognizing problems at the end of the deployment process and will flip the symbolic link back to the previous deployment and attempt to restart that version of the code if deployment fails.
 
