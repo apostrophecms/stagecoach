@@ -33,14 +33,14 @@ apt-get -y update &&
 apt-get install -y mongodb-org &&
 echo "Installed MongoDB" &&
 echo "Configuring MongoDB to listen only on localhost" &&
-echo "bind_ip = 127.0.0.1" >> /etc/mongodb.conf &&
+echo "bind_ip = 127.0.0.1" >> /etc/mongod.conf &&
 
 # The default configuration for MongoDB assumes taking up 6GB off the bat for every single
 # database is cool and also inhales tons of space for journal files. This is overkill for
 # most deployments, so we instruct MongoDB to use smaller files
-echo "smallfiles = true" >> /etc/mongodb.conf &&
+echo "smallfiles = true" >> /etc/mongod.conf &&
 
-cat <<EOM >> /etc/init/mongodb.conf &&
+cat <<EOM >> /etc/init/mongod.conf &&
 # Make sure we respawn if the physical server
 # momentarily lies about disk space, but also
 # make sure we don't respawn too fast
@@ -53,8 +53,8 @@ respawn
 EOM
 
 echo "It is OK to get a warning here"
-stop mongodb
-start mongodb &&
+stop mongod
+start mongod &&
 # Upgrade npm to latest and prevent self-signed certificate error
 npm config set ca "" && npm install -g npm &&
 # Used to run things indefinitely restarting as needed
