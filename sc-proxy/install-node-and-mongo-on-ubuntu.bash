@@ -31,9 +31,9 @@ echo "deb http://downloads-distro.mongodb.org/repo/ubuntu-upstart dist 10gen" >>
 apt-get -y update &&
 # Install MongoDB 2.6, not the old 2.4 installed by mongodb-10gen
 apt-get install -y mongodb-org &&
-echo "Installed MongoDB" &&
-echo "Configuring MongoDB to listen only on localhost" &&
-echo "bind_ip = 127.0.0.1" >> /etc/mongod.conf &&
+echo "Installed MongoDB"
+# We no longer set bind_ip here because the repository's standard conf does it now, and
+# objects to duplicate settings.
 
 # The default configuration for MongoDB assumes taking up 6GB off the bat for every single
 # database is cool and also inhales tons of space for journal files. This is overkill for
