@@ -1,68 +1,114 @@
 # stagecoach: host multiple Node apps on your Linux servers
 
-Stagecoach is a framework for deploying node.js web applications and testing them on a staging server, then deploying them to production servers. It includes a complete mechanism for running many such node applications on a single staging or production server, restarting them gracefully on reboot, and accessing them at nice URLs without port numbers.
-
-Stagecoach also includes `sc-deploy`, a minimalist deployment tool based on rsync that understands multiple deployment targets and makes pretty much no assumptions about your project. It is suitable for pretty much any site or web app you wish to deploy, although the examples provided are node-oriented. Although `sc-deploy` relies on `rsync` it will also run an optional `dependencies` script to install dependencies that are server-specific and can't be transferred from your development environment. This is handy for installing npm modules with `npm install`.
-
-An `sc-rollback` script is included for those cases where you regret a deployment.
-
-We also threw in a nice installer script for node, forever and mongodb on Ubuntu which installs the recommended versions from Joyent and the MongoDB team.
-
-`sc-proxy` is a node.js-based frontend proxy server solution for web apps that listen on independent ports, built on top of the amazing node-http-proxy by nodejitsu. It's great for testing lots of node projects on the same staging server while giving them all reasonable hostnames and allowing them to respond on port 80. With a little tweaking it may also be suitable for production deployment of clusters of small sites that don't need a VPS unto themselves.
-
-We chose to create these tools because we wanted a solution that didn't contain a lot of implicit assumptions about the sites being deployed (such as Capistrano, which really wants to deploy a Rails project, although you can convince it to deploy other things). If you know how to add a command to a shell script, then you know how to change the behavior of stagecoach.
+Stagecoach is a simple framework for deploying node.js web applications to your own servers. It is useful for both staging and production environments. It can run multiple apps on the same server, keep them running with `forever`, and restart them gracefully at reboot time.
 
 ## Requirements
 
-The provided start and stop scripts require that `forever` be installed globally:
+Your servers will need `node` of course, and also the `forever` utility:
 
-    npm install -g forever
-
-`forever` is a great node utility for ensuring that a process is restarted if it should fail.
-
-Stagecoach should be installed to `/opt/stagecoach`. Apps will run from `/opt/stagecoach/apps/appname/current`.
+```
+npm install -g forever
+```
 
 ## Configuration
 
-Copy stagecoach to `/opt/stagecoach` on your staging server. Copy `/opt/stagecoach/settings.example` to `/opt/stagecoach/settings` and make sure `USER` is set to the non-root user that your apps should run as. Then create the `/opt/stagecoach/apps` folder and `chown` that folder to the same non-root user. `nodeapps` is a nice name if you want to make a new user for node apps, but any user account can be used. Root is a bad choice for security reasons.
+Stagecoach lives in `/opt/stagecoach` and your individual apps live in subdirectories of `/opt/stagecoach/apps`.
 
-Additional configuration steps are covered under `sc-proxy`, below.
+```
+[create a user called "nodeapps"]
+[log in as root]
+cd /opt
+git clone https://github.com/punkave/stagecoach
+cd stagecoach
+cp settings.example settings
+[edit the settings file]
+mkdir apps
+chown nodeapps apps
+```
+
+You will carry out all of your deployments via the `nodeapps` user, never the root user.
+
+You can use a different non-root account if you change the `USER` setting in `/opt/stagecoach/settings`.
 
 ## sc-deploy
 
-`sc-deploy` is a short bash script that handles web app deployment with automatic rollback on failure. You'll find it in `/opt/stagecoach/bin`.
+`sc-deploy` is a simple bash script that handles web app deployment with automatic rollback on failure.
 
-`sc-deploy` is meant to be run on your **development** system, and deploys code to other systems.
+`sc-deploy` is meant to be run on your **development** system, and deploys code to your servers.
 
-Like other deployment tools, sc-deploy deploys to a new folder on the target server each time you deploy, and switches a symlink at the last possible minute only if everything went smoothly. The server is stopped, migrated and started only after the rsync is complete. So depending on how long your database migrations take, your deployment downtime can be very short indeed.
+### Installing sc-deploy
 
-`sc-deploy` creates a symbolic link from `/opt/stagecoach/apps/example/current` to the latest deployment folder if everything happens successfully (assuming that your project is called `myproject` and you base your paths on those in `example`). If you're deploying traditional web languages like PHP, you'll want to make sure your web document root is configured accordingly.
+```
+[on your development machine]
+cd
+mkdir -p src
+cd src
+git clone https://github.com/punkave/stagecoach
+cd stagecoach
+subl ~/.profile
+[add /User/MYUSERNAME/src/stagecoach/bin to your PATH]
+```
+
+### Setting up your application to be deployed
+
+1. Make sure your application listens on the port specified by the `PORT` environment variable, if available:
+
+```
+// Let's assume `app` is an Express app object
+var port = process.env.PORT || 3000;
+app.listen(port);
+```
+
+As seen here, it's OK to fall back to port `3000` or whatever pleases you for development work.
+
+2. Copy the `deployment` folder from our example app to your application:
+
+```
+cp -r src/stagecoach/example/deployment src/YOURAPPHERE/deployment
+```
+
+3. Review the `deployment` scripts, especially `migrate`, which should take care of adding symlinks to any folders that contain persistent files that should *not* be wiped out by every new deployment. The example application has two shared folders, `data` and `uploads`. The `migrate` script ensures that the `data` folder is symbolically linked into each new deployment as `data`, and the `uploads` folder is symbolically linked as `public/uploads`.
+
+*The shared `data` folder is required.* Stagecoach uses it to remember this app's assigned port number in `data/port`. You may also store other persistent files there.
+
+4. Make sure your app's main `.js` file is `app.js`, or edit `deployment/start` and `deployment/stop`.
+
+5. Edit `deployment/settings` and set `PROJECT` to the shortname of your project (usually, the directory name).
+
+6. Edit `deployment/settings.production`. Make sure `USER` matches the non-root username on the server and `SERVER` is the hostname of your server. Create additional `settings.*` files if you have additional servers to deploy to, such as `staging`.
+
+7. Deploy to production for the first time:
+
+```
+sc-deploy production
+```
+
+When the script finishes, your app will be up and running. On the first startup, a unique port number is assigned automatically and stored in `data/port`.
+
+8. Configure `nginx` or another server as a reverse proxy to forward traffic to your app. The easiest way to set up nginx is to use [mechanic](https://github.com/punkave/mechanic). Manual nginx configuration examples are also included below.
+
+### Updating your app
+
+Just use `sc-deploy production` at any time to deploy again. **The previous deployment is not shut down until after the new one is completely ready to start up, so there is very little downtime.** Stagecoach does this:
+
+1. Deploys the new version
+2. Installs dependencies by running `deployment/dependencies`
+3. Stops the old app with `deployment/stop`
+4. Migrates with `deployment/migrate`
+5. Symbolically links the new deployment to `/current`
+6. Starts up with `deployment/start`
+
+Notice that your old deployment stays up and running until the really slow stuff is already finished. That's why there is almost no downtime.
 
 **By default, 5 old deployments are kept on the server.** This is useful if you need to roll back. You can change this number by setting `KEEP` in your `deployment/settings` file.
 
-`sc-deploy` relies on bash scripts in a subdirectory of your project called `deployment` to carry out the work of starting (`start`), installing dependencies for (`dependencies`), stopping (`stop`) and migrating (`migrate`) your project. If any of these scripts exit with a nonzero status, the deployment process stops and the previous version of the site stays live. Currently any failed deployment folders are left on the server for your debugging convenience.
+### Excluding files from deployment
 
-Settings that apply to all deployment targets for this project, such as the project's name and (usually) the deployment directory, reside in `deployment/settings`. You'll want to edit the `PROJECT` setting, and possibly the `DIR` setting as well. The project name should be a reasonable Unix shortname; it's the folder name you'll be deploying to. If you use `sc-proxy` it is also the subdomain you'll use to access the staging site.
+If an `rsync_exclude.txt` file is present in `deployment`, files mentioned there are not included in the deployment and are left alone if they exist on the server (see the `rsync` manpage). Shared folders like `data` and `public/uploads` folders are very important to include here.
 
-Settings for a specific target, such as `staging`, go in `deployment/settings.staging`. The `USER` and `HOST` settings (for ssh and rsync) typically appear here because they are different for each server.
+### Avoiding passwords
 
-Most apps have folders that contain data rather than code and should not be replaced in a deployment. Check out the provided `migrate` script to see how we provide a shared `data` folder. A symlink to this folder is created from each new deployment folder.
-
-If an `rsync_exclude.txt` file is present in `deployment`, files mentioned there are not included in the deployment and are left alone if they exist on the server (see the `rsync` manpage).
-
-Run sc-deploy like this (after setting up your deployment folder correctly):
-
-    sc-deploy staging
-
-You'll want to make sure `sc-deploy` is in your `PATH`.
-
-`sc-deploy` deploys straightforwardly from the current directory to the target via rsync. This is a deliberate choice: the code you just QA'd on the box in front of you is the code you want to deploy, not something that might be juuuust a little different in fun and surprising ways. However you can easily wrap `sc-deploy` in a script that updates from git, svn or whatever you may prefer and then runs tests before agreeing to carry out a deployment. As long as you have a test script that returns a nonzero exit code on failure, that can be as simple as:
-
-    git pull && ./tests && sc-deploy staging
-
-So `sc-deploy` plays well with jenkins and other shells for running deployment and testing tools.
-
-Tip: you should definitely set up a trusted ssh public key that allows you to ssh to your server without entering your password over and over.
+`sc-deploy` does make several ssh connections. Entering a password for each one is painful. You should definitely [set up a trusted ssh public key that allows you to ssh to your server without entering your password over and over.](http://archive.oreilly.com/pub/h/66) Passwords are error-prone, annoying and insecure. Friends don't let friends use passwords.
 
 ## sc-rollback
 
@@ -86,37 +132,11 @@ To roll back to one of these, type:
 sc-rollback production 2014-12-04-18-40-26
 ```
 
-**Warning:** if you have performed database migrations that are not backwards-compatible, such as removing a column from a SQL table, you should not roll back.
+**Warning:** if you have performed database migrations that are not backwards-compatible with older versions of your code, such as removing a column from a SQL table, you should not roll back beyond that point.
 
 ## `example` app
 
-In the `example` folder you'll find an example of ndoe app deployment, with all the important bits already set up (be sure to look in `example/deployment`). The `start` script integrates with `sc-proxy` by registering a port number for the project to listen on via the data/port file, and the provided example node app consults that file as well at startup.
-
-## Installing dependencies on the server side
-
-Note that if your project has a `production/dependencies` script it will be run immediately after the rsync is complete and before the site is restarted. This is the right place to execute `npm install` if your application has dependencies on npm modules that involve compiled code that can't be transferred from your own computer.
-
-Did your eyes skip right over all that? Don't worry - if you are copying your app's `deployment` folder from the latest `example` app included with stagecoach, then `npm install` will happen for you automatically. Those of you already using stagecoach who want this feature can just copy `example/deployment/dependencies`.
-
-Thanks to Howard Tyson for pointing out the need to install dependencies on the server side.
-
-## Production Hosting
-
-You can do production hosting with `sc-proxy` as well.
-
-Just create a `data/hosts` file for each site. In that site, list the hostnames that the site should respond for, like this:
-
-    myexample.com
-    www.myexample.com
-    some-alternate-name.com
-
-Note that if `data/hosts` exists, `sc-proxy` will stop responding on the staging subdomain for that site. Which doesn't bother you, because you have separate staging and production servers... I hope!
-
-## Reconfiguration
-
-If you add or remove an app entirely, sc-proxy should spot that right away.
-
-If you add or modify a `hosts` file, there will be a delay of up to a minute. I'm working on changing this by watching these files in the filesystem in an efficient way.
+In the `example` folder you'll find an example of node app deployment, with all the important bits already set up (be sure to look in `example/deployment`). The `start` script reads `data/port` and sets the `PORT` environment variable before starting the example app, which honors the environment variable.
 
 ## Warnings and Limitations
 
@@ -126,73 +146,51 @@ The provided sample `start` and `stop` scripts do not attempt to use `chroot` ja
 
 This isn't for Windows.
 
-## sc-proxy
-
-`sc-proxy` is a simple reverse proxy server for web applications that are installed like `example`: in subdirectories of /opt/stagecoach/apps, with a `data/port` file that records the port number each web application is listening on. `sc-proxy` accepts requests at nice URLs like `http://projectname.mydomain.com` and proxies them to `http://localhost:3001` and so forth, so that all of the projects can respond to reasonable URLs without wacky port numbers. `sc-proxy` itself is just a handful of lines of JavaScript because it is built on Nodejitsu's `node-http-proxy`, which is terrific because it handles websockets and all those other neat things that node apps do, but is also a perfectly valid proxy for any plain vanilla HTTP web application.
-
-The most convenient way to use `sc-proxy` is to set up a wildcard DNS "A" record for the domain you use to stage your projects. This way you don't need to add a separate "A" record for every project that is ready to test on the staging server. In our office we have a domain name set aside for this purpose.
-
-`sc-proxy` looks at the name of each folder in `/opt/stagecoach/apps` and proxies traffic for that subdomain to the port specified in the `data/port` file in that folder. If you have a folder called `/var/webapps/myproject` that contains a `data/port` file containing the number 3001, then traffic coming to `http://myproject.mydomain.com` will be proxied to `http://localhost:3001`. Note that in the `start` script provided with `example` you can find simple shell script logic to assign a currently unclaimed port number to a new web app on its first deployment.
-
-If `sc-proxy` is asked to access a site that isn't part of its current configuration, it will check whether that site has been added to `/var/webapps`. In addition, once a minute `sc-proxy` scans for any modifications to `/var/webapps`, on the off chance a site has been removed or reconfigured.
-
-## Configuring sc-proxy
-
-To configure `sc-proxy`, copy the file `config-example.js` to `config.js` and change the `domain` setting to match your needs. Also set `ip` to the IP address you want to listen on; you can set `0.0.0.0` to respond on all interfaces. If you want to listen on a specific IP address to avoid a conflict with a second IP address reserved for Apache, you can do that as well. You can also change the port from port 80 for testing purposes, although there is not much point in using `sc-proxy` if you don't plan to eventually configure it to bind on port 80.
-
-Similarly, if Apache is on the same server, you will need to configure Apache to listen on a different IP address, or a different port if you use the `defaultPort` setting of `sc-proxy`.
-
-You can set `defaultPort` to forward traffic to that port if it does not match any of your Stagecoach sites. This allows sc-proxy to act as a front end to Apache, as long as you change Apache's configuration to bind on the port indicated by `defaultPort`. This is one way to avoid a second IP address.
-
-When your configuration is complete, cd to the `sc-proxy` folder and run:
-
-    npm install
-
 The `sc-proxy` folder also contains an `upstart` script that can start and stop the proxy and the associated apps on an Ubuntu system. By copying this script to `/etc/init` on your Ubuntu system you can arrange for your proxy and web apps to be running at all times. You can also `start stagecoach` and `stop stagecoach` at any time (as root).
 
 ## Restarting Sites on Reboot
 
-Drop this in `/etc/rc.local` (on Ubuntu) or otherwise execute it on reboot:
+Drop this in `/etc/rc.local` (on Ubuntu), `/etc/rc.d/rc.local` (on CentOS) or otherwise execute it on reboot:
 
-    cd /opt/stagecoach/sc-proxy
-    bash sc-start-all
+    cd /opt/stagecoach
+    bash bin/sc-start-all
 
-## Installing Node and MongoDB on Ubuntu
+## Configuring nginx yourself
 
-You don't have to use Ubuntu. But if you do, you might find this shell script handy:
+We use [nginx](http://nginx.org) as a reverse proxy to forward traffic for specific domain names to specific apps, each of which is listening on a particular port. The easiest way to do this is to use our [mechanic](https://github.com/punkave/mechanic) tool to set up nginx.
 
-    sc-proxy/install-node-and-mongo-on-ubuntu.bash
+If you don't want to use mechanic, it's not hard to set up nginx yourself. Here's a sample configuration:
 
-This shell script is provided in the `sc-proxy` folder. It does what it says: it installs Node and MongoDB correctly on Ubuntu, using the recommended repositories for the latest stable releases, not the older stuff in Ubuntu's official repositories. It also configures MongoDB to run safely, accepting connections only on localhost. You can change that if you like, just please consider the security implications. MongoDB's default configuration has no security of any kind, so our changes make sense.
+```
+server {
+    listen       www.example.com:80;
+    server_name  www.example.com;
 
-## Using nginx instead
+    access_log  /var/log/nginx/example.access.log;
+    error_log  /var/log/nginx/example.error.log;
+    client_max_body_size 32M;
 
-We often wind up using [nginx](http://nginx.org) rather than `sc-proxy`. `sc-deploy` certainly doesn't mind. All you have to do is set up nginx to proxy connections for each site to the port number for each node app. The port number can be found in the `data/port` file for that app on the server.
+    location / {
+     proxy_pass  http://localhost:3000;
+     proxy_next_upstream error timeout invalid_header http_500 http_502 http_503 http_504;
+     proxy_redirect off;
+     proxy_buffering off;
+     proxy_set_header        Host            $host;
+     proxy_set_header        X-Real-IP       $remote_addr;
+     proxy_set_header        X-Forwarded-For $proxy_add_x_forwarded_for;
+   }
+}
+```
 
-You don't get automatic addition of new sites this way (not yet, anyway) but with node 0.10.x we experienced some difficulties with `sc-proxy` and `node-http-proxy` and decided we didn't need this particular piece of our ecosystem to run on node.
+You can get better performance by allowing nginx to serve static files directly. That's all included in our standard configuration with [mechanic](https://github.com/punkave/mechanic).
 
-Here's an nginx configuration file for one of our sites:
+## sc-proxy (deprecated)
 
-    server {
-        listen       www.example.com:80;
-        server_name  www.example.com;
-
-        access_log  /var/log/nginx/example.access.log;
-        error_log  /var/log/nginx/example.error.log;
-        client_max_body_size 32M;
-
-        location / {
-         proxy_pass  http://localhost:3000;
-         proxy_next_upstream error timeout invalid_header http_500 http_502 http_503 http_504;
-         proxy_redirect off;
-         proxy_buffering off;
-         proxy_set_header        Host            $host;
-         proxy_set_header        X-Real-IP       $remote_addr;
-         proxy_set_header        X-Forwarded-For $proxy_add_x_forwarded_for;
-       }
-    }
+`sc-proxy` is a node.js-based frontend proxy server solution for web apps that listen on independent ports, built on top of the `node-http-proxy` module. It picks up port numbers directly from the Stagecoach `data/port` files. It's a neat proof of concept, but we've found that performance is much better with nginx (see above). If you're still interested in sc-proxy, check out the `README.md` in that subdirectory for more information.
 
 ## Changelog
+
+09/25/2015: deprecated `sc-proxy` in favor of nginx, managed by `mechanic`. Moved things that have nothing to do with `sc-proxy` out of that subdirectory. Rewrote the documentation to reflect our own best practices.
 
 12/11/2014: `sc-rollback` introduced.
 
