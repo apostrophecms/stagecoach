@@ -1,0 +1,31 @@
+#!/bin/bash
+
+if [ ! -d "deployment" ]; then
+  echo "I don't see a deployment folder in the current directory."
+  exit 1
+fi
+
+if [ -z "$1" ] ; then
+  echo "sc-ssh staging|production [optional command]"
+  echo
+  echo "Launches a shell connection to the server for the specified deployment name"
+  echo "and changes directory to the current deployment of the app before continuing."
+  echo
+  echo "If there are no extra arguments, you get an interactive shell prompt."
+  echo
+  echo "If there is a command argument, that command runs noninteractively and exits."
+  exit 1
+fi
+
+TARGET=$1
+
+# Settings files need to exist
+source deployment/settings || exit 1
+source deployment/settings.$TARGET || exit 1
+
+if [ -z "$2" ] ; then
+  ssh -t -p $SSH_PORT $USER@$SERVER "cd $DIR/current; bash"
+else
+  ssh -p $SSH_PORT $USER@$SERVER "${@:2}"
+fi
+

@@ -184,11 +184,55 @@ server {
 
 You can get better performance by allowing nginx to serve static files directly. That's all included in our standard configuration with [mechanic](https://github.com/punkave/mechanic).
 
+## Disabling an app
+
+To disable an application on a particular server:
+
+```
+[cd to your app locally first]
+sc-disable production
+```
+
+This will stop the app and then move it to `/opt/stagecoach/disabled-apps`. This is handy if you are testing many apps and need to free up RAM for those in active use.
+
+## Re-enabling an app
+
+To re-enable an app that you disabled:
+
+```
+[cd to your app locally first]
+sc-enable production
+```
+
+This will move the app back to `/opt/stagecoach/apps` and restart it.
+
+## Running shell commands on the server conveniently
+
+To open an interactive shell and automatically `cd` to the current deployment folder of your app:
+
+```
+[cd to your app locally first]
+sc-shell production
+```
+
+If your app is `myapp`, this will automatically `cd` to `/opt/stagecoach/apps/myapp/current` before starting an interactive shell.
+
+To simply run a remote command and then exit:
+
+```
+[cd to your app locally first]
+sc-shell production ls
+```
+
+This will automatically `cd` to `/opt/stagecoach/apps/myapp/current` before running `ls` and exiting.
+
 ## sc-proxy (deprecated)
 
 `sc-proxy` is a node.js-based frontend proxy server solution for web apps that listen on independent ports, built on top of the `node-http-proxy` module. It picks up port numbers directly from the Stagecoach `data/port` files. It's a neat proof of concept, but we've found that performance is much better with nginx (see above). If you're still interested in sc-proxy, check out the `README.md` in that subdirectory for more information.
 
 ## Changelog
+
+02/09/2016: added the `sc-shell`, `sc-disable` and `sc-enable` utilities.
 
 09/25/2015: deprecated `sc-proxy` in favor of nginx, managed by `mechanic`. Moved things that have nothing to do with `sc-proxy` out of that subdirectory. Rewrote the documentation to reflect our own best practices.
 

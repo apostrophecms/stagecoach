@@ -1,0 +1,34 @@
+#!/bin/bash
+
+if [ ! -d "deployment" ]; then
+  echo "I don't see a deployment folder in the current directory."
+  exit 1
+fi
+
+if [ -z "$1" ] ; then
+  echo "sc-enable staging|production"
+  echo
+  echo "Reenables this app for the specified deployment."
+  echo
+  echo "The app is moved from disabled-apps to apps and started."
+  echo
+  echo "NOTE: when you deploy an app for the first time it is already enabled."
+  echo
+  echo "Use sc-disable to disable an app."
+  exit 1
+fi
+
+TARGET=$1
+
+# Settings files need to exist
+source deployment/settings || exit 1
+source deployment/settings.$TARGET || exit 1
+
+ssh -p $SSH_PORT $USER@$SERVER <<EOM
+cd /opt/stagecoach &&
+mv disabled-apps/$PROJECT $DIR &&
+cd $DIR/current &&
+bash deployment/start &&
+echo "Enabled."
+EOM
+
