@@ -24,8 +24,8 @@ source deployment/settings || exit 1
 source deployment/settings.$TARGET || exit 1
 
 if [ -z "$2" ] ; then
-  ssh -t -p $SSH_PORT $USER@$SERVER "cd $DIR/current; bash"
+  ssh -t -p $SSH_PORT $USER@$SERVER "cd $DIR/current && bash"
 else
-  ssh -p $SSH_PORT $USER@$SERVER "${@:2}"
+  ssh -p $SSH_PORT $USER@$SERVER "cd $DIR/current && ${@:2}"
 fi
 

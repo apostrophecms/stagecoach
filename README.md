@@ -232,6 +232,8 @@ This will automatically `cd` to `/opt/stagecoach/apps/myapp/current` before runn
 
 ## Changelog
 
+02/14/2016: `sc-shell` now `cd`s correctly when running a command rather than an interactive shell.
+
 02/09/2016: added the `sc-shell`, `sc-disable` and `sc-enable` utilities.
 
 09/25/2015: deprecated `sc-proxy` in favor of nginx, managed by `mechanic`. Moved things that have nothing to do with `sc-proxy` out of that subdirectory. Rewrote the documentation to reflect our own best practices.
