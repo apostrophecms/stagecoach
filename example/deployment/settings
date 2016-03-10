@@ -2,9 +2,8 @@
 
 # Settings shared by all targets (staging, production, etc). Usually the
 # shortname of the project (which is also the hostname for the frontend
-# proxy server used for staging sites) and the directory name. For our
-# web apps that use sc-proxy we make sure each is a subdirectory
-# of /opt/stagecoach/apps
+# proxy server used for staging sites) and the directory name, which
+# should be a subdirectory of /opt/stagecoach/apps
 
 PROJECT=example
 DIR=/opt/stagecoach/apps/$PROJECT

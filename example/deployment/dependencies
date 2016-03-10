@@ -16,6 +16,11 @@ ln -s ../../data $HERE/data
 # in a separate place so we don't have to have two express.static calls
 
 mkdir -p ../../uploads
+
+# Just in case this project has no assets yet and it's in git, which
+# doesn't store empty folders
+mkdir -p $HERE/public
+
 ln -s ../../../uploads $HERE/public/uploads
 
 # Install any dependencies that can't just be rsynced over with

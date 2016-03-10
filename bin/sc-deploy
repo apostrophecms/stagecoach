@@ -59,7 +59,8 @@ ssh -p $SSH_PORT $USER@$SERVER <<EOM
     cd $DEPLOYTO
     bash deployment/dependencies
   fi
-  if [ \$? -eq 0 ]; then
+  OUTCOME="\$?"
+  if [ \$OUTCOME -eq 0 ]; then
     # Stop old deployment if any
     if [ -e $CURRENT ]; then
       # Don't give up yet if we can't stop the old deployment - it might just be
@@ -68,6 +69,7 @@ ssh -p $SSH_PORT $USER@$SERVER <<EOM
       if [ \$? -eq 0 ]; then
         cd $CURRENT &&
         echo "Stopping previous deployment" &&
+        STOPPED=1 &&
         bash deployment/stop
       else
         echo "Previous deployment is missing"
@@ -80,18 +82,19 @@ ssh -p $SSH_PORT $USER@$SERVER <<EOM
     ln -s $DEPLOYTO $CURRENT &&
     cd $CURRENT &&
     bash deployment/start
+    OUTCOME="\$?"
   fi
   # If deployment failed, relink and restart the previous deployment
-  if [ \$? -ne 0 ]; then
+  if [ \$OUTCOME -ne 0 ]; then
     echo "ERROR on deployment"
     if [ -n "\$FORMER" ]; then
       echo "Relinking previous deployment"
       rm -f $CURRENT
       ln -s \$FORMER $CURRENT &&
-      echo "Restarting previous deployment" &&
-      cd $CURRENT && bash deployment/start
-    else
-      echo "There is no prior deployment to restart."
+      if [ \$STOPPED -eq 1 ]; then
+        echo "Restarting previous deployment" &&
+        cd $CURRENT && bash deployment/start
+      fi
     fi
     echo "Removing failed deployment"
     rm -rf $DEPLOYTO

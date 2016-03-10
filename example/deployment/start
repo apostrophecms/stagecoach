@@ -2,9 +2,9 @@
 
 # Make the site live again, for instance by tweaking a .htaccess file
 # or starting a node server. In this example we also set up a
-# data/port file so that sc-proxy.js can figure out what port
-# to forward traffic to for this site. The idea is that every
-# folder in /var/webapps represents a separate project with a separate
+# data/port file to remember what port is consistently used for this
+# site, allowing easy nginx proxy configuration. The idea is that every
+# folder in /opt/stagecoach/apps represents a separate project with a separate
 # node process, each listening on a specific port, and they all
 # need traffic forwarded from a reverse proxy server on port 80
 

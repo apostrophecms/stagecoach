@@ -232,6 +232,16 @@ This will automatically `cd` to `/opt/stagecoach/apps/myapp/current` before runn
 
 ## Changelog
 
+03/10/2016: important `sc-deploy` fixes for error conditions.
+
+* If a deployment fails, correctly print an error message rather than a cheerful one. (Previously `sc-deploy` was doing the right thing, but printing the wrong thing. Except in cases where `migrate` failed, as mentioned below.)
+
+* If a deployment fails, and we got as far as stopping the previous deployment, relink and restart the previous deployment. This is important if the `migrate` script fails. Did you know that `if` statements destroy `$?`? I didn't. Man, I hate shell scripting.
+
+* Updated various misleading comments in old scripts in `example/deployment`.
+
+* Just for newbie convenience, the `dependencies` script of the `example` project will create the new deployment folder's `public` subdirectory if it is missing. In real life projects you'll have one with static assets at the very least, or you'll edit `dependencies`.
+
 02/14/2016: `sc-shell` now `cd`s correctly when running a command rather than an interactive shell.
 
 02/09/2016: added the `sc-shell`, `sc-disable` and `sc-enable` utilities.
