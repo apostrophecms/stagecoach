@@ -3,7 +3,7 @@
 # Run any necessary database migration tasks that should happen
 # while the site is paused here.
 
-#node app.js apostrophe:migrate
+#node app.js apostrophe-migrations:migrate
 
 echo "Site migrated"
 
