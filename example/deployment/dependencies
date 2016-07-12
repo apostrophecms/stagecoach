@@ -53,5 +53,5 @@ fi
 
 # Run migrations that are safe for execution
 # while the previous deployment is still live
-#node app apostrophe:migrate --safe
+#node app apostrophe-migrations:migrate --safe
 
