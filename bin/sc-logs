@@ -1,0 +1,24 @@
+#!/bin/bash
+
+if [ ! -d "deployment" ]; then
+  echo "I don't see a deployment folder in the current directory."
+  exit 1
+fi
+
+if [ -z "$1" ] ; then
+  echo "sc-logs staging|production"
+  echo
+  echo "Displays latest console log file contents."
+  exit 1
+fi
+
+TARGET=$1
+
+if [ -e deployment/logs ]; then
+  # Custom script for viewing logs
+  sc-shell $1 "bash deployment/logs"
+else
+  # Default behavior: forever logs
+  sc-shell $1 echo 'forever logs `pwd`/app.js'
+  sc-shell $1 'forever logs `pwd`/app.js'
+fi
