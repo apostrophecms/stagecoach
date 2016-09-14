@@ -25,7 +25,6 @@ if [[ $1 == *"@"* ]]; then
   PARTS=($PARTS)
   MY_USER=${PARTS[0]}
   TARGET=${PARTS[1]}
-  echo $TARGET
 else
   TARGET=$1
 fi
