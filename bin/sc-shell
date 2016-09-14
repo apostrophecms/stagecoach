@@ -6,10 +6,13 @@ if [ ! -d "deployment" ]; then
 fi
 
 if [ -z "$1" ] ; then
-  echo "sc-ssh staging|production [optional command]"
+  echo "sc-ssh [user@]staging|production [optional command]"
   echo
   echo "Launches a shell connection to the server for the specified deployment name"
   echo "and changes directory to the current deployment of the app before continuing."
+  echo
+  echo "If you do not specify a username, the USER setting for the deployment target is"
+  echo "automatically used."
   echo
   echo "If there are no extra arguments, you get an interactive shell prompt."
   echo
@@ -17,15 +20,27 @@ if [ -z "$1" ] ; then
   exit 1
 fi
 
-TARGET=$1
+if [[ $1 == *"@"* ]]; then
+  PARTS=$(echo $1 | tr "@" "\n")
+  PARTS=($PARTS)
+  MY_USER=${PARTS[0]}
+  TARGET=${PARTS[1]}
+  echo $TARGET
+else
+  TARGET=$1
+fi
 
 # Settings files need to exist
 source deployment/settings || exit 1
 source deployment/settings.$TARGET || exit 1
 
+if [ -z "$MY_USER" ]; then
+  MY_USER=$USER
+fi
+
 if [ -z "$2" ] ; then
-  ssh -t -p $SSH_PORT $USER@$SERVER "cd $DIR/current && bash"
+  ssh -t -p $SSH_PORT $MY_USER@$SERVER "cd $DIR/current && bash"
 else
-  ssh -p $SSH_PORT $USER@$SERVER "cd $DIR/current && ${@:2}"
+  ssh -p $SSH_PORT $MY_USER@$SERVER "cd $DIR/current && ${@:2}"
 fi
 

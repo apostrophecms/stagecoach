@@ -226,11 +226,21 @@ sc-shell production ls
 
 This will automatically `cd` to `/opt/stagecoach/apps/myapp/current` before running `ls` and exiting.
 
+To connect as a different user:
+
+```
+sc-shell root@production
+```
+
+This command will attempt to connect as root rather than the username found in `settings.production`.
+
 ## sc-proxy (deprecated)
 
 `sc-proxy` is a node.js-based frontend proxy server solution for web apps that listen on independent ports, built on top of the `node-http-proxy` module. It picks up port numbers directly from the Stagecoach `data/port` files. It's a neat proof of concept, but we've found that performance is much better with nginx (see above). If you're still interested in sc-proxy, check out the `README.md` in that subdirectory for more information.
 
 ## Changelog
+
+09/14/2016: `sc-shell` now accepts an optional username. Syntax: `sc-shell root@production` connects to the `production` target but uses the username `root` rather than the username in the `settings.production` file.
 
 03/10/2016: important `sc-deploy` fixes for error conditions.
 
