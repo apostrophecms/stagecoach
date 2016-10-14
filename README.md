@@ -138,6 +138,12 @@ sc-rollback production 2014-12-04-18-40-26
 
 In the `example` folder you'll find an example of node app deployment, with all the important bits already set up (be sure to look in `example/deployment`). The `start` script reads `data/port` and sets the `PORT` environment variable before starting the example app, which honors the environment variable.
 
+## Running gulp, grunt, etc. *before* deployment
+
+As of 10/14/16 Stagecoach now runs `deployment/before-connecting`, *locally on your computer*, before deploying.
+
+This script is a convenient place to run a gulp build or similar, saving you the hassle of installing gulp and similar tools in production.
+
 ## Warnings and Limitations
 
 `sc-deploy` expects that you will not have spaces in your target deployment folder name or your project name. If you like making things difficult for shell scripts, this is not the tool for you.

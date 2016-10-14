@@ -1,0 +1,5 @@
+#!/bin/bash
+
+# This script runs LOCALLY, BEFORE the ssh connection to the server.
+# It is a fine place to rebuild assets with gulp and so on, avoiding
+# the need to install gulp in production.

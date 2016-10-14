@@ -43,6 +43,11 @@ fi
 # For use with tail -n
 KEPT=$[$KEEP+1]
 
+if [ -f "deployment/before-connecting" ]; then
+  # A good place to run "gulp" etc.
+  bash deployment/before-connecting
+fi
+
 # For now we just don't check whether 'stop' worked, because it fails on the first
 # deploy (chicken and egg problem, stop isn't there yet). TODO: fix this with
 # an 'if folder exists' test on the server; make the remote script a multiline,
