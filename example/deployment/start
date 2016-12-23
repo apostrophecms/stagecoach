@@ -23,7 +23,7 @@ if [ -f "data/port" ]; then
 else
   # No port set yet for this site. Scan and sort the existing port numbers if any,
   # grab the highest existing one
-  PORT=`cat ../../../*/data/port 2>/dev/null | sort -n | tail -1`
+  PORT=`cat ../../../*/data/port 2>/dev/null | tr " " "\n" | sort -n | tail -1`
   if [ "$PORT" == "" ]; then
   	echo "First app ever, assigning port 3000"
   	PORT=3000

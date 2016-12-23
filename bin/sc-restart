@@ -1,0 +1,26 @@
+#!/bin/bash
+
+if [ ! -d "deployment" ]; then
+  echo "I don't see a deployment folder in the current directory."
+  exit 1
+fi
+
+if [ -z "$1" ] ; then
+  echo "sc-restart staging|production"
+  echo
+  echo "Restarts the app remotely without redeploying."
+  exit 1
+fi
+
+TARGET=$1
+
+# Settings files need to exist
+source deployment/settings || exit 1
+source deployment/settings.$TARGET || exit 1
+
+ssh -p $SSH_PORT $USER@$SERVER <<EOM
+cd $DIR/current &&
+bash deployment/stop &&
+bash deployment/start &&
+echo "Restart successful."
+EOM

@@ -1,6 +1,6 @@
 # stagecoach: host multiple Node apps on your Linux servers
 
-Stagecoach is a simple framework for deploying node.js web applications to your own servers. It is useful for both staging and production environments. It can run multiple apps on the same server, keep them running with `forever`, and restart them gracefully at reboot time.
+Stagecoach is a simple framework for deploying node.js web applications to your own servers. It is useful for both staging and production environments. It can run multiple apps on the same server, keep them running with `forever`, redeploy with a minimum of downtime, and restart them gracefully at reboot time.
 
 ## Requirements
 
@@ -109,6 +109,12 @@ If an `rsync_exclude.txt` file is present in `deployment`, files mentioned there
 ### Avoiding passwords
 
 `sc-deploy` does make several ssh connections. Entering a password for each one is painful. You should definitely [set up a trusted ssh public key that allows you to ssh to your server without entering your password over and over.](http://archive.oreilly.com/pub/h/66) Passwords are error-prone, annoying and insecure. Friends don't let friends use passwords.
+
+## sc-restart
+
+If you need to restart your app but you don't have any code changes to deploy, use the `sc-restart` convenience command. In most cases this is unnecessary because `forever` will automatically keep the app running, but you might find it useful if you have changed something in the server environment and need to force your app to notice.
+
+`sc-restart` will always run the `deployment/stop` and `deployment/start` scripts properly, providing support for restarting multiple instances of the app on the same server.
 
 ## sc-rollback
 
@@ -245,6 +251,12 @@ This command will attempt to connect as root rather than the username found in `
 `sc-proxy` is a node.js-based frontend proxy server solution for web apps that listen on independent ports, built on top of the `node-http-proxy` module. It picks up port numbers directly from the Stagecoach `data/port` files. It's a neat proof of concept, but we've found that performance is much better with nginx (see above). If you're still interested in sc-proxy, check out the `README.md` in that subdirectory for more information.
 
 ## Changelog
+
+12/23/2016:
+
+* `sc-restart` is now available as a handy remote command. It runs the `deployment/stop` and `deployment/start` scripts on the specified target server, exactly as if you had redeployed the site.
+
+* The default `start` script is now smart enough to take apps configured for multiple ports into account when searching for the next free port for a new app.
 
 09/14/2016: `sc-shell` now accepts an optional username. Syntax: `sc-shell root@production` connects to the `production` target but uses the username `root` rather than the username in the `settings.production` file.
 

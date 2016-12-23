@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Stop all the apps. 
+# Stop all the apps. Runs on the SERVER. Not a remote tool.
 
 source /opt/stagecoach/settings
 
