@@ -24,6 +24,10 @@ fi
 source deployment/settings || exit 1
 source deployment/settings.$TARGET || exit 1
 
+if [ -n "$SSH_KEY_PATH" ]; then
+  SSH_KEY="-i $SSH_KEY_PATH"
+fi
+
 VERSION=`date "+%Y-%m-%d-%H-%M-%S"`
 
 # rsync to a new folder, then flip the symlink if everything runs without error.
@@ -53,9 +57,9 @@ fi
 # an 'if folder exists' test on the server; make the remote script a multiline,
 # maintainable thing
 
-ssh -p $SSH_PORT $USER@$SERVER "mkdir -p $DIR/deployments" &&
-rsync -e "ssh -p $SSH_PORT -l$USER" -C -a --delete $EXCLUDE . $USER@$SERVER:$DEPLOYTO &&
-ssh -p $SSH_PORT $USER@$SERVER <<EOM
+ssh -p $SSH_PORT $SSH_KEY $USER@$SERVER "mkdir -p $DIR/deployments" &&
+rsync -e "ssh -p $SSH_PORT $SSH_KEY -l$USER" -C -a --delete $EXCLUDE . $USER@$SERVER:$DEPLOYTO &&
+ssh -p $SSH_PORT $SSH_KEY $USER@$SERVER <<EOM
   $ADJUST_PATH
   # A good place to run "npm install"
   echo "Looking for dependencies script at $DEPLOYTO/deployment/dependencies"

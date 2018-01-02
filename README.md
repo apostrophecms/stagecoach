@@ -252,6 +252,10 @@ This command will attempt to connect as root rather than the username found in `
 
 ## Changelog
 
+01/02/2017:
+
+* `SSH_KEY_PATH` optional variable added to **development** `settings` to use the separate (e.g. passwordless) SSH private key for authentication with the server.
+
 12/23/2016:
 
 * `sc-restart` is now available as a handy remote command. It runs the `deployment/stop` and `deployment/start` scripts on the specified target server, exactly as if you had redeployed the site.

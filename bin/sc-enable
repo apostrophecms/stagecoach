@@ -24,7 +24,11 @@ TARGET=$1
 source deployment/settings || exit 1
 source deployment/settings.$TARGET || exit 1
 
-ssh -p $SSH_PORT $USER@$SERVER <<EOM
+if [ -n "$SSH_KEY_PATH" ]; then
+  SSH_KEY="-i $SSH_KEY_PATH"
+fi
+
+ssh -p $SSH_PORT $SSH_KEY $USER@$SERVER <<EOM
 cd /opt/stagecoach &&
 mv disabled-apps/$PROJECT $DIR &&
 cd $DIR/current &&
