@@ -1,5 +1,7 @@
 #!/bin/bash
 
+echo "testing"
+
 if [ ! -d "deployment" ]; then
   echo "I don't see a deployment folder in the current directory."
   exit 1
@@ -37,9 +39,18 @@ if [ -z "$MY_USER" ]; then
   MY_USER=$USER
 fi
 
+ALLOW_FOR_SUDO=""
+if [ "$SUDO_USER" ]; then
+  ALLOW_FOR_SUDO="sudo -i -u $SUDO_USER"
+fi
+
+echo $ALLOW_FOR_SUDO
+
 if [ -z "$2" ] ; then
-  ssh -t -p $SSH_PORT $MY_USER@$SERVER "cd $DIR/current && bash"
+  echo   ssh -t -p $SSH_PORT $MY_USER@$SERVER $ALLOW_FOR_SUDO "cd $DIR/current && whoami && bash -i"
+
+  ssh -t -p $SSH_PORT $MY_USER@$SERVER $ALLOW_FOR_SUDO "cd $DIR/current && whoami && bash -i"
 else
-  ssh -p $SSH_PORT $MY_USER@$SERVER "cd $DIR/current && ${@:2}"
+  ssh -p $SSH_PORT $MY_USER@$SERVER $ALLOW_FOR_SUDO "cd $DIR/current && ${@:2}"
 fi
 

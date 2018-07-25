@@ -18,7 +18,12 @@ TARGET=$1
 source deployment/settings || exit 1
 source deployment/settings.$TARGET || exit 1
 
-ssh -p $SSH_PORT $USER@$SERVER <<EOM
+ALLOW_FOR_SUDO=""
+if [ "$SUDO_USER" ]; then
+  ALLOW_FOR_SUDO="sudo -i -u $SUDO_USER"
+fi
+
+ssh -p $SSH_PORT $USER@$SERVER $ALLOW_FOR_SUDO <<EOM
 cd $DIR/current &&
 bash deployment/stop &&
 bash deployment/start &&
