@@ -52,14 +52,21 @@ if [ -f "deployment/before-connecting" ]; then
   bash deployment/before-connecting
 fi
 
+ALLOW_FOR_SUDO=""
+RSYNC_PATH="rsync"
+if [ "$SUDO_USER" ]; then
+  ALLOW_FOR_SUDO="sudo -i -u $SUDO_USER"
+  RSYNC_PATH="sudo -i -u $SUDO_USER rsync"
+fi
+
 # For now we just don't check whether 'stop' worked, because it fails on the first
 # deploy (chicken and egg problem, stop isn't there yet). TODO: fix this with
 # an 'if folder exists' test on the server; make the remote script a multiline,
 # maintainable thing
 
-ssh -p $SSH_PORT $SSH_KEY $USER@$SERVER "mkdir -p $DIR/deployments" &&
-rsync -e "ssh -p $SSH_PORT $SSH_KEY -l$USER" -C -a --delete $EXCLUDE . $USER@$SERVER:$DEPLOYTO &&
-ssh -p $SSH_PORT $SSH_KEY $USER@$SERVER <<EOM
+ssh -p $SSH_PORT $SSH_KEY $USER@$SERVER $ALLOW_FOR_SUDO "mkdir -p $DIR/deployments" &&
+rsync -e "ssh -p $SSH_PORT $SSH_KEY -l$USER" --rsync-path="$RSYNC_PATH" $ALLOW_FOR_SUDO_RSYNC_PATH -C -a --delete $EXCLUDE . $USER@$SERVER:$DEPLOYTO &&
+ssh -p $SSH_PORT $SSH_KEY $USER@$SERVER $ALLOW_FOR_SUDO <<EOM
   $ADJUST_PATH
   # A good place to run "npm install"
   echo "Looking for dependencies script at $DEPLOYTO/deployment/dependencies"

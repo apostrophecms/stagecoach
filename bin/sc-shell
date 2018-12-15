@@ -41,9 +41,14 @@ if [ -n "$SSH_KEY_PATH" ]; then
   SSH_KEY="-i $SSH_KEY_PATH"
 fi
 
+ALLOW_FOR_SUDO=""
+if [ "$SUDO_USER" ]; then
+  ALLOW_FOR_SUDO="sudo -i -u $SUDO_USER"
+fi
+
 if [ -z "$2" ] ; then
-  ssh -t -p $SSH_PORT $SSH_KEY $MY_USER@$SERVER "cd $DIR/current && bash"
+  ssh -t -p $SSH_PORT $SSH_KEY $MY_USER@$SERVER $ALLOW_FOR_SUDO "cd $DIR/current && bash"
 else
-  ssh -p $SSH_PORT $SSH_KEY $MY_USER@$SERVER "cd $DIR/current && ${@:2}"
+  ssh -p $SSH_PORT $SSH_KEY $MY_USER@$SERVER $ALLOW_FOR_SUDO "cd $DIR/current && ${@:2}"
 fi
 
