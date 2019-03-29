@@ -75,7 +75,7 @@ cp -r src/stagecoach/example/deployment src/YOURAPPHERE/deployment
 
 5. Edit `deployment/settings` and set `PROJECT` to the shortname of your project (usually, the directory name).
 
-6. Edit `deployment/settings.production`. Make sure `USER` matches the non-root username on the server and `SERVER` is the hostname of your server. Create additional `settings.*` files if you have additional servers to deploy to, such as `staging`.
+6. Edit `deployment/settings.production`. Make sure `USER` matches the non-root username on the server and `SERVER` is the hostname of your server. Create additional `settings.*` files if you have additional servers to deploy to, such as `staging`, also setting `NODE_ENV` to something other than `production` as appropriate.
 
 7. Deploy to production for the first time:
 
@@ -251,6 +251,10 @@ This command will attempt to connect as root rather than the username found in `
 `sc-proxy` is a node.js-based frontend proxy server solution for web apps that listen on independent ports, built on top of the `node-http-proxy` module. It picks up port numbers directly from the Stagecoach `data/port` files. It's a neat proof of concept, but we've found that performance is much better with nginx (see above). If you're still interested in sc-proxy, check out the `README.md` in that subdirectory for more information.
 
 ## Changelog
+
+3/29/2019:
+
+* Adds the setting of `NODE_ENV` in deployment settings.
 
 12/23/2016:
 

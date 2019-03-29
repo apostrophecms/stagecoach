@@ -1,8 +1,8 @@
 {
-  "author": "P'unk Avenue <tom@punkave.com> (http://punkave.com/)",
-  "name": "example",
-  "description": "Example node app run and deployed under stagecoach",
-  "version": "1.1.0",
+  "author": "P'unk Avenue",
+  "name": "stagecoach",
+  "description": "Stagecoach is a simple framework for deploying node.js web applications to your own servers.",
+  "version": "1.2.0",
   "homepage": "http://github.com/punkave/stagecoach",
   "repository": {
     "type": "git",
