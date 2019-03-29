@@ -7,3 +7,4 @@
 
 USER=nodeapps
 SERVER=example.com
+NODE_ENV=production

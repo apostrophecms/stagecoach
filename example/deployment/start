@@ -16,6 +16,16 @@ if [ ! -f "app.js" ]; then
   exit 1
 fi
 
+if [ -z "$1" ] ; then
+  echo 'ℹ️  No NODE_ENV set in deployment settings. Defaulting to "production"'
+  NODE_ENV=production
+else
+  NODE_ENV=$1
+fi
+
+# Set the environment as production.
+export NODE_ENV=$NODE_ENV
+
 # Assign a port number if we don't yet have one
 
 if [ -f "data/port" ]; then

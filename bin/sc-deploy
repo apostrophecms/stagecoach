@@ -93,7 +93,7 @@ ssh -p $SSH_PORT $USER@$SERVER $ALLOW_FOR_SUDO <<EOM
     rm -rf $CURRENT &&
     ln -s $DEPLOYTO $CURRENT &&
     cd $CURRENT &&
-    bash deployment/start
+    bash deployment/start $NODE_ENV
     OUTCOME="\$?"
   fi
   # If deployment failed, relink and restart the previous deployment
@@ -105,7 +105,7 @@ ssh -p $SSH_PORT $USER@$SERVER $ALLOW_FOR_SUDO <<EOM
       ln -s \$FORMER $CURRENT &&
       if [ \$STOPPED -eq 1 ]; then
         echo "Restarting previous deployment" &&
-        cd $CURRENT && bash deployment/start
+        cd $CURRENT && bash deployment/start $NODE_ENV
       fi
     fi
     echo "Removing failed deployment"
