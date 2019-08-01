@@ -26,7 +26,7 @@ DEPLOYMENTS="$DIR/deployments"
 
 if [ -z "$2" ] ; then
   echo "Available deployments:"
-  ssh -p $SSH_PORT $USER@$SERVER ls $DEPLOYMENTS
+  ssh $SSH_OPTIONS -p $SSH_PORT $USER@$SERVER ls $DEPLOYMENTS
   exit 0
 fi
 
@@ -35,7 +35,7 @@ if [ "$SUDO_USER" ]; then
   ALLOW_FOR_SUDO="sudo -i -u $SUDO_USER"
 fi
 
-ssh -p $SSH_PORT $USER@$SERVER $ALLOW_FOR_SUDO <<EOM
+ssh $SSH_OPTIONS -p $SSH_PORT $USER@$SERVER $ALLOW_FOR_SUDO <<EOM
 cd $DIR/current &&
 sh deployment/stop &&
 cd $DIR &&

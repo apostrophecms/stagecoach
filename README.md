@@ -252,6 +252,10 @@ This command will attempt to connect as root rather than the username found in `
 
 ## Changelog
 
+08/01/2019:
+
+* If the `SSH_OPTIONS` environment variable is set, it will be inserted into all `ssh` commands used to run `rsync`, invoke things, etc. The contents are on the `ssh` command line right after `ssh` itself. This is handy for `-i` and other features not otherwise present.
+
 12/23/2016:
 
 * `sc-restart` is now available as a handy remote command. It runs the `deployment/stop` and `deployment/start` scripts on the specified target server, exactly as if you had redeployed the site.
