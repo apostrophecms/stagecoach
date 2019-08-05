@@ -47,9 +47,7 @@ fi
 echo $ALLOW_FOR_SUDO
 
 if [ -z "$2" ] ; then
-  echo   ssh -t $SSH_OPTIONS -p $SSH_PORT $MY_USER@$SERVER $ALLOW_FOR_SUDO "cd $DIR/current && whoami && bash -i"
-
-  ssh -t -p $SSH_PORT $MY_USER@$SERVER $ALLOW_FOR_SUDO "cd $DIR/current && whoami && bash -i"
+  ssh -t $SSH_OPTIONS -p $SSH_PORT $MY_USER@$SERVER $ALLOW_FOR_SUDO "cd $DIR/current && whoami && bash -i"
 else
   ssh $SSH_OPTIONS -p $SSH_PORT $MY_USER@$SERVER $ALLOW_FOR_SUDO "cd $DIR/current && ${@:2}"
 fi

@@ -1,5 +1,10 @@
-# Currently must be /opt/stagecoach
-DIR=/opt/stagecoach
+# Should be the same as the shortname / repo name / database name /
+# everything name of your Apostrophe site
+PROJECT=foo
+# Currently this is the only allowable value
+DIR=/opt/stagecoach/apps/$PROJECT
+# Occasionally, this is changed in a misguided attempt at security by obscurity
+SSH_PORT=22
 # User to launch individual webapps as.
 # Since they do not listen on port 80 this need not be root
 USER=nodeapps
