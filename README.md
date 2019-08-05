@@ -46,7 +46,7 @@ cd src
 git clone https://github.com/punkave/stagecoach
 cd stagecoach
 subl ~/.profile
-[add /User/MYUSERNAME/src/stagecoach/bin to your PATH]
+[add /Users/MYUSERNAME/src/stagecoach/bin to your PATH]
 ```
 
 ### Setting up your application to be deployed
