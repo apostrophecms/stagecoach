@@ -60,9 +60,9 @@ fi
 # an 'if folder exists' test on the server; make the remote script a multiline,
 # maintainable thing
 
-ssh -p $SSH_PORT $USER@$SERVER $ALLOW_FOR_SUDO "mkdir -p $DIR/deployments" &&
-rsync -e "ssh -p $SSH_PORT -l$USER" --rsync-path="$RSYNC_PATH" $ALLOW_FOR_SUDO_RSYNC_PATH -C -a --delete $EXCLUDE . $USER@$SERVER:$DEPLOYTO &&
-ssh -p $SSH_PORT $USER@$SERVER $ALLOW_FOR_SUDO <<EOM
+ssh $SSH_OPTIONS -p $SSH_PORT $USER@$SERVER $ALLOW_FOR_SUDO "mkdir -p $DIR/deployments" &&
+rsync -e "ssh $SSH_OPTIONS -p $SSH_PORT -l$USER" --rsync-path="$RSYNC_PATH" $ALLOW_FOR_SUDO_RSYNC_PATH -C -a --delete $EXCLUDE . $USER@$SERVER:$DEPLOYTO &&
+ssh $SSH_OPTIONS -p $SSH_PORT $USER@$SERVER $ALLOW_FOR_SUDO <<EOM
   $ADJUST_PATH
   # A good place to run "npm install"
   echo "Looking for dependencies script at $DEPLOYTO/deployment/dependencies"
