@@ -68,7 +68,8 @@ ssh $SSH_OPTIONS -p $SSH_PORT $USER@$SERVER $ALLOW_FOR_SUDO <<EOM
   echo "Looking for dependencies script at $DEPLOYTO/deployment/dependencies"
   hostname
   if [ -f $DEPLOYTO/deployment/dependencies ]; then
-    cd $DEPLOYTO
+    cd $DEPLOYTO &&
+    echo "Running deployment/dependencies" &&
     bash deployment/dependencies
   fi
   OUTCOME="\$?"
@@ -88,11 +89,14 @@ ssh $SSH_OPTIONS -p $SSH_PORT $USER@$SERVER $ALLOW_FOR_SUDO <<EOM
       fi
     fi
     # Run migrations and start new deployment after flipping symlink
+    echo "Running migrations"
     cd $DEPLOYTO &&
     bash deployment/migrate &&
+    echo "Symlinking current deployment" &&
     rm -rf $CURRENT &&
     ln -s $DEPLOYTO $CURRENT &&
     cd $CURRENT &&
+    echo "Invoking deployment/start" &&
     bash deployment/start
     OUTCOME="\$?"
   fi
