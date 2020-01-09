@@ -61,7 +61,11 @@ fi
 # maintainable thing
 
 ssh $SSH_OPTIONS -p $SSH_PORT $USER@$SERVER $ALLOW_FOR_SUDO "mkdir -p $DIR/deployments" &&
-rsync -e "ssh $SSH_OPTIONS -p $SSH_PORT -l$USER" --rsync-path="$RSYNC_PATH" $ALLOW_FOR_SUDO_RSYNC_PATH -C -a --delete $EXCLUDE . $USER@$SERVER:$DEPLOYTO &&
+ 
+# -C excludes many things, add back "core" because it is not an uncommon
+# folder name in npm modules
+
+rsync -e "ssh $SSH_OPTIONS -p $SSH_PORT -l$USER" --rsync-path="$RSYNC_PATH" $ALLOW_FOR_SUDO_RSYNC_PATH -C -a --delete $EXCLUDE --include "core" . $USER@$SERVER:$DEPLOYTO &&
 ssh $SSH_OPTIONS -p $SSH_PORT $USER@$SERVER $ALLOW_FOR_SUDO <<EOM
   $ADJUST_PATH
   # A good place to run "npm install"
