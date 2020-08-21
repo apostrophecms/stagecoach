@@ -40,8 +40,8 @@ if [ -z "$MY_USER" ]; then
 fi
 
 ALLOW_FOR_SUDO=""
-if [ "$SUDO_USER" ]; then
-  ALLOW_FOR_SUDO="sudo -i -u $SUDO_USER"
+if [ "$REMOTE_SUDO_USER" ]; then
+  ALLOW_FOR_SUDO="sudo -i -u $REMOTE_SUDO_USER"
 fi
 
 echo $ALLOW_FOR_SUDO

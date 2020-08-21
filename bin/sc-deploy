@@ -50,9 +50,9 @@ fi
 
 ALLOW_FOR_SUDO=""
 RSYNC_PATH="rsync"
-if [ "$SUDO_USER" ]; then
-  ALLOW_FOR_SUDO="sudo -i -u $SUDO_USER"
-  RSYNC_PATH="sudo -i -u $SUDO_USER rsync"
+if [ "$REMOTE_SUDO_USER" ]; then
+  ALLOW_FOR_SUDO="sudo -i -u $REMOTE_SUDO_USER"
+  RSYNC_PATH="sudo -i -u $REMOTE_SUDO_USER rsync"
 fi
 
 # For now we just don't check whether 'stop' worked, because it fails on the first

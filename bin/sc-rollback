@@ -31,8 +31,8 @@ if [ -z "$2" ] ; then
 fi
 
 ALLOW_FOR_SUDO=""
-if [ "$SUDO_USER" ]; then
-  ALLOW_FOR_SUDO="sudo -i -u $SUDO_USER"
+if [ "$REMOTE_SUDO_USER" ]; then
+  ALLOW_FOR_SUDO="sudo -i -u $REMOTE_SUDO_USER"
 fi
 
 ssh $SSH_OPTIONS -p $SSH_PORT $USER@$SERVER $ALLOW_FOR_SUDO <<EOM
