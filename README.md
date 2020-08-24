@@ -146,19 +146,9 @@ In the `example` folder you'll find an example of node app deployment, with all 
 
 ## Running gulp, grunt, etc. *before* deployment
 
-As of 10/14/16 Stagecoach now runs `deployment/before-connecting`, *locally on your computer*, before deploying.
+Stagecoach runs `deployment/before-connecting`, *locally on your computer*, before deploying.
 
 This script is a convenient place to run a gulp build or similar, saving you the hassle of installing gulp and similar tools in production.
-
-## Warnings and Limitations
-
-`sc-deploy` expects that you will not have spaces in your target deployment folder name or your project name. If you like making things difficult for shell scripts, this is not the tool for you.
-
-The provided sample `start` and `stop` scripts do not attempt to use `chroot` jails to prevent apps from seeing each other's files. If you need that, you might be happier with `haibu`.
-
-This isn't for Windows.
-
-The `sc-proxy` folder also contains an `upstart` script that can start and stop the proxy and the associated apps on an Ubuntu system. By copying this script to `/etc/init` on your Ubuntu system you can arrange for your proxy and web apps to be running at all times. You can also `start stagecoach` and `stop stagecoach` at any time (as root).
 
 ## Restarting Sites on Reboot
 
@@ -246,11 +236,27 @@ sc-shell root@production
 
 This command will attempt to connect as root rather than the username found in `settings.production`.
 
+## Using `sudo` on the server side
+
+If you need to `sudo` on the server side after making the ssh connection, you can set the `REMOTE_SUDO_USER` environment variable in your `settings.production` file or similar for other target names. *Prior to 08/21/2020 this feature was unofficial and undocumented, but used `SUDO_USER`, which was not a good idea beacuse that caused conflicts.*
+
 ## sc-proxy (deprecated)
 
 `sc-proxy` is a node.js-based frontend proxy server solution for web apps that listen on independent ports, built on top of the `node-http-proxy` module. It picks up port numbers directly from the Stagecoach `data/port` files. It's a neat proof of concept, but we've found that performance is much better with nginx (see above). If you're still interested in sc-proxy, check out the `README.md` in that subdirectory for more information.
 
+## Warnings and Limitations
+
+`sc-deploy` expects that you will not have spaces in your target deployment folder name or your project name. If you like making things difficult for shell scripts, this is not the tool for you.
+
+The provided sample `start` and `stop` scripts do not attempt to use `chroot` jails to prevent apps from seeing each other's files. If you need that, you might be happier with Docker.
+
+This isn't for Windows.
+
 ## Changelog
+
+08/21/2020:
+
+* There was an undocumented, unofficial feature to `sudo` on the server side after making the `ssh` connection, set by passing the `SUDO_USER` environment variable. As it turns out, this was a bad idea because `SUDO_USER` is automatically set if you have used sudo in your *local* environment. We have changed the variable `stagecoach` supports to `REMOTE_SUDO_USER` and documented the feature.
 
 08/01/2019:
 
