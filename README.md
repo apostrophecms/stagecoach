@@ -254,6 +254,10 @@ This isn't for Windows.
 
 ## Changelog
 
+06/11/2021:
+
+* The `/opt/stagecoach/settings.example` file contained incorrect settings. As written, it would result in `/opt/stagecoach/bin/sc-start-all` failing to restart applications at reboot. It now contains appropriate settings for the top-level configuration file. If you copied this file, edit it to match the new `settings.example`, possibly changing the non-root username setting to match your needs.
+
 08/21/2020:
 
 * There was an undocumented, unofficial feature to `sudo` on the server side after making the `ssh` connection, set by passing the `SUDO_USER` environment variable. As it turns out, this was a bad idea because `SUDO_USER` is automatically set if you have used sudo in your *local* environment. We have changed the variable `stagecoach` supports to `REMOTE_SUDO_USER` and documented the feature.
