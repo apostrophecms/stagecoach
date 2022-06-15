@@ -1,7 +1,5 @@
 #!/bin/bash
 
-echo "testing"
-
 if [ ! -d "deployment" ]; then
   echo "I don't see a deployment folder in the current directory."
   exit 1
