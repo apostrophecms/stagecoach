@@ -45,7 +45,7 @@ KEPT=$[$KEEP+1]
 
 if [ -f "deployment/before-connecting" ]; then
   # A good place to run "gulp" etc.
-  bash deployment/before-connecting $TARGET
+  bash deployment/before-connecting $TARGET || exit 1
 fi
 
 ALLOW_FOR_SUDO=""
